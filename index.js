@@ -92,9 +92,9 @@ async function pingprojects() {
 
 
 function getprojects() {
-    return JSON.parse(readFileSync(path.join(process.cwd(), 'projects.json'), 'utf-8') || '[]');
+    return JSON.parse(readFileSync(path.join(process.cwd(), 'projectstats.json'), 'utf-8') || '[]');
 }
 
 function saveprojects(obj) {
-    return writeFileSync(path.join(process.cwd(), 'projects.json'), JSON.stringify(obj), 'utf-8');
+    return writeFileSync(path.join(process.cwd(), 'projectstats.json'), JSON.stringify(obj), 'utf-8');
 }
