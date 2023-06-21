@@ -1,0 +1,27 @@
+{
+  "name": "www",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ."
+  },
+  "pm2": [
+    {
+      "name": "web",
+      "script": "index.js"
+    },
+    {
+      "name": "proxy",
+      "script": "cloudflared tunnel run --url localhost:58270 www"
+    }
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "node-fetch": "^3.3.1"
+  }
+}

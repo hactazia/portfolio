@@ -1,0 +1,46 @@
+<section class="banner shadow-lg vh-50">
+  <div class="card card-cover h-100 overflow-hidden text-bg-dark" style="background-image: url('https://cdn.discordapp.com/attachments/1120136461233168437/1120973281407795310/banner.png');">
+    <div class="d-flex flex-column h-100 p-5 pb-3 text-white text-shadow-1">
+      <div class="pt-5 m-auto text-center">
+        <h1 class="display-4 lh-1 fw-bold">Projets</h1>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="container-sm">
+  <center>
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3 d-flex justify-content-center">
+      <% for(const project of projects) { %>
+      <div class="shadow-sm border rounded-3 col p-3 m-2 bg-body-tertiary">
+        <div class="d-flex align-middle align-items-center justify-content-center">
+          <div class="rounded-4 shadow d-inline-flex align-items-center justify-content-center <%= project.active ? 'text-bg-primary' : 'text-bg-secondary' %> bg-gradient fs-2 mb-3 p-3" style="width: 5rem;">
+            <%- project.icon || '<i class="bi bi-bug"></i>' %>
+          </div>
+          <h3 class="fs-2 text-body-emphasis ms-3">
+            <%= project.name || 'Secret' %>
+          </h3>
+        </div>
+        <p class="mb-2">
+          <%= project.description || '' %>
+        </p>
+        <% if(project.pings && project.pings.length> 1) { %>
+        <div class="row g-1 row-cols-1 justify-content-center rounded shadow overflow-hidden m-0 p-0 mb-2" style="width: fit-content;">
+          <% var out = [];
+          for(var i = 0; i < bars && i < 12; i++) { 
+            const ping = project.pings[project.pings.length - i - 1] ;
+            out.push(`\<div class="col-1 ${!ping ? 'bg-secondary' : ( ping > 1000 || ping <= 0 ? 'bg-danger' : (ping < 500 ? 'bg-success' : 'bg-warning'))} bg-gradient m-0" style="user-select:none;width:1em;"
+              data-bs-toggle="tooltip" data-bs-title="Ping: ${ping}ms">&nbsp;\</div>`)
+            } %><%- out.sort(() => -1).join('') %>
+        </div>
+        <% } %>
+        <% if(project.url) { %>
+        <a href="<%= project.url %>" class="icon-link">
+          Aller voir le site
+          <i class="bi bi-box-arrow-up-right"></i>
+        </a>
+        <% } %>
+      </div>
+      <% } %>
+    </div>
+  </center>
+</div>
