@@ -68,6 +68,7 @@ app.listen(58270, function () {
 async function pingprojects() {
     var json = getprojects();
     for (var i = 0; i < json.length; i++) {
+        
         if (json[i].pings && json[i].pings.length >= 0) {
             var dif = Math.floor((Date.now() - (json[i].date || 0)) / (60 * 60 * 1000));
             if (dif >= 1) {
