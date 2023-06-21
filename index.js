@@ -42,6 +42,14 @@ app.get('/projects', async function (req, res) {
     })
 });
 
+app.get('/commissions', async function (req, res) {
+    const { openned = false, types = [] } = JSON.parse(readFileSync(path.join(process.cwd(), 'commissions.json'), 'utf-8') || '{}');
+    res.render('template', {
+        title: 'Commissions',
+        content: await render('commissions', { openned, types })
+    })
+});
+
 app.all('*', async function (req, res) {
     res.status(404).render('template', {
         title: '404',
@@ -66,10 +74,14 @@ async function pingprojects() {
                 if (dif > 1)
                     json[i].pings.push(...('#'.repeat((dif > 25 ? 25 : dif) - 1).split('').map(() => -1)));
                 var now = Date.now();
-                var response = await fetch(json[i].url);
-                if (response.status != 200)
+                try {
+                    var response = await fetch(json[i].url);
+                    if (response.status != 200)
+                        json[i].pings.push(0);
+                    else json[i].pings.push(Date.now() - now);
+                } catch {
                     json[i].pings.push(0);
-                else json[i].pings.push(Date.now() - now);
+                };
                 json[i].date = now;
             };
             json[i].pings = json[i].pings.slice(json[i].pings.length - 20, json[i].pings.length);

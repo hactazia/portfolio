@@ -1,0 +1,70 @@
+<section class="banner shadow-lg vh-50">
+    <div class="card card-cover h-100 overflow-hidden text-bg-dark"
+        style="background-image: url('https://cdn.discordapp.com/attachments/1120136461233168437/1120973281407795310/banner.png');">
+        <div class="d-flex flex-column h-100 p-5 pb-3 text-white text-shadow-1">
+            <div class="pt-5 m-auto text-center">
+                <h1 class="display-4 lh-1 fw-bold">Commissions</h1>
+            </div>
+        </div>
+    </div>
+</section>
+<div class="container py-5">
+    <div class="alert alert-info mx-auto" role="alert" style="width: fit-content;">
+        <i class="bi bi-info-circle"></i>
+        Le prise de contacte se fait à partir de la rubrique <a href="/contact">Contactes</a>.
+    </div>
+    <div class="row row-cols-1 row-cols-lg-2">
+        <div class="accordion col mx-auto p-0 rounded-4 shadow overflow-hidden" id="commissions">
+            <% var i = 0; for(const article of types) { %>
+            <div class="accordion-item border-0 p-2 bg-secondary">
+                <h2 class="accordion-header bg-secondary">
+                    <button
+                        class="shadow rounded-4 btn border-0 text-bg-dark w-100 p-3 <%= i == 0 ? '' : 'collapsed' %>"
+                        type="button" data-bs-toggle="collapse" data-bs-target="#commission-<%= i %>"
+                        aria-expanded="false" aria-controls="commission-<%= i %>">
+                        <%- article.icon || '<i class="bi bi-bookmark-fill"></i>' %>
+                        <span class="mx-3"> — </span>
+                        <span><%- article.name || 'En cours d\'ajout' %></span>
+                        <% if(!openned || !article.openned || article.subtypes.filter(e => e.openned).length === 0) { %>
+                        <span class="mx-3"> — </span>
+                        <i>(Non Disponible)</i>
+                        <% } %>
+                    </button>
+                </h2>
+                <div id="commission-<%= i %>" class="accordion-collapse collapse" data-bs-parent="#commissions">
+                    <div class="accordion-body bg-secondary">
+
+                        <div class="mx-auto card m-3 shadow-sm border rounded-3 bg-body-tertiary"
+                            style="width: fit-content;">
+                            <div class="card-body">
+                                <p class="m-0"><%= article.description %></p>
+                                <% if((article.subtypes || []).length === 0) { %>
+                                <i>Rien de Disponible pour cette catégorie.</i>
+                                <% } %>
+                            </div>
+                        </div>
+                        <% for(const {name, price, description, openned: open } of (article.subtypes || [])) { %>
+                        <div class="card m-3 shadow-sm border rounded-3 bg-body-tertiary">
+                            <div class="card-body">
+                                <h5 class="card-title"><%= name %></h5>
+                                <h6 class="card-subtitle mb-2 text-body-secondary">
+                                    <% if(openned && article.openned && open) { %>
+                                    <%= price %>€/TTC
+                                    <% }else {%>
+                                    Non Disponible
+                                    <% } %>
+                                </h6>
+                                <p class="card-text"><%= description %></p>
+                                <% if(openned && article.openned && open) { %>
+                                <a href="/contact" class="card-link">Me conctacter</a>
+                                <% } %>
+                            </div>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+            <% i++; } %>
+        </div>
+    </div>
+</div>
