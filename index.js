@@ -9,6 +9,8 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(process.cwd(), 'views'));
 app.use(express.static(path.join(process.cwd(), 'public/')))
 
+const STORAGE_DIR = process.env.STORAGE_DIR || process.cwd();
+
 app.use(function (req, res, next) {
     const ip = req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     console.log(ip, '>', req.url);
@@ -43,7 +45,7 @@ app.get('/projects', async function (req, res) {
 });
 
 app.get('/commissions', async function (req, res) {
-    const { openned = false, types = [] } = JSON.parse(readFileSync(path.join(process.cwd(), 'commissions.json'), 'utf-8') || '{}');
+    const { openned = false, types = [] } = JSON.parse(readFileSync(path.join(STORAGE_DIR, 'commissions.json'), 'utf-8') || '{}');
     res.render('template', {
         title: 'Commissions',
         content: await render('commissions', { openned, types })
@@ -93,9 +95,9 @@ async function pingprojects() {
 
 
 function getprojects() {
-    return JSON.parse(readFileSync(path.join(process.cwd(), 'projectstats.json'), 'utf-8') || '[]');
+    return JSON.parse(readFileSync(path.join(STORAGE_DIR, 'projectstats.json'), 'utf-8') || '[]');
 }
 
 function saveprojects(obj) {
-    return writeFileSync(path.join(process.cwd(), 'projectstats.json'), JSON.stringify(obj), 'utf-8');
+    return writeFileSync(path.join(STORAGE_DIR, 'projectstats.json'), JSON.stringify(obj), 'utf-8');
 }
