@@ -12,6 +12,7 @@ app.set('views', path.join(process.cwd(), 'views'));
 app.use(express.static(path.join(process.cwd(), 'public/')))
 
 const STORAGE_DIR = process.env.STORAGE_DIR || process.cwd();
+const config = require(path.join(STORAGE_DIR, 'config.json'));
 
 app.use(function (req, res, next) {
     const ip = req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
@@ -25,20 +26,35 @@ function render(file, options = {}) {
 
 app.get('/', async function (req, res) {
     res.render('template', {
-        title: 'Accueil',
+        title: config.titles['home'],
+        author: config.author,
+        globaltitle: config.title,
+        canonical: config.defaultOrigin + req.url.split('?')[0],
+        description: config.descriptions['home'] || '',
+        keywords: config.descriptions['home'] || '',
         content: await render('home')
     })
 });
 app.get('/contact', async function (req, res) {
     res.render('template', {
-        title: 'Contactes',
+        title: config.titles['contact'],
+        author: config.author,
+        globaltitle: config.title,
+        canonical: config.defaultOrigin + req.url.split('?')[0],
+        description: config.descriptions['contact'] || '',
+        keywords: config.descriptions['contact'] || '',
         content: await render('contact')
     });
 });
 
 app.get('/about', async function (req, res) {
     res.render('template', {
-        title: 'À propos',
+        title: config.titles['about'],
+        author: config.author,
+        globaltitle: config.title,
+        canonical: config.defaultOrigin + req.url.split('?')[0],
+        description: config.descriptions['about'] || '',
+        keywords: config.descriptions['about'] || '',
         content: await render('about')
     });
 });
@@ -46,7 +62,12 @@ app.get('/about', async function (req, res) {
 
 app.get('/projects', async function (req, res) {
     res.render('template', {
-        title: 'Projets',
+        title: config.titles['projects'],
+        author: config.author,
+        globaltitle: config.title,
+        canonical: config.defaultOrigin + req.url.split('?')[0],
+        description: config.descriptions['projects'] || '',
+        keywords: config.descriptions['projects'] || '',
         content: await render('projects', {
             bars: 20,
             projects: getprojects()
@@ -57,7 +78,12 @@ app.get('/projects', async function (req, res) {
 app.get('/commissions', async function (req, res) {
     const { openned = false, types = [] } = JSON.parse(readFileSync(path.join(STORAGE_DIR, 'commissions.json'), 'utf-8') || '{}');
     res.render('template', {
-        title: 'Commissions',
+        author: config.author,
+        globaltitle: config.title,
+        canonical: config.defaultOrigin + req.url.split('?')[0],
+        description: config.descriptions['commissions'] || '',
+        keywords: config.descriptions['commissions'] || '',
+        title: config.titles['commissions'] || '',
         content: await render('commissions', { openned, types })
     })
 });
@@ -74,7 +100,12 @@ app.get('/sitemap.xml', function (req, res) {
 
 app.all('*', async function (req, res) {
     res.status(404).render('template', {
-        title: '404',
+        author: config.author,
+        globaltitle: config.title,
+        canonical: config.defaultOrigin + req.url.split('?')[0],
+        description: config.descriptions['404'] || '',
+        keywords: config.descriptions['404'] || '',
+        title: config.titles['404'] || '',
         content: await render('404')
     })
 });
