@@ -1,7 +1,9 @@
 const express = require('express');
+const sitemap = require('express-sitemap');
 const app = express();
 const ejs = require('ejs');
 const path = require('path');
+const fs = require('fs');
 const { readFileSync, writeFileSync } = require('fs');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
@@ -34,6 +36,14 @@ app.get('/contact', async function (req, res) {
     });
 });
 
+app.get('/about', async function (req, res) {
+    res.render('template', {
+        title: 'À propos',
+        content: await render('about')
+    });
+});
+
+
 app.get('/projects', async function (req, res) {
     res.render('template', {
         title: 'Projets',
@@ -52,6 +62,16 @@ app.get('/commissions', async function (req, res) {
     })
 });
 
+var sm;
+
+app.get('/robots.txt', function (req, res) {
+    sm.TXTtoWeb(res)
+});
+
+app.get('/sitemap.xml', function (req, res) {
+    sm.XMLtoWeb(res)
+});
+
 app.all('*', async function (req, res) {
     res.status(404).render('template', {
         title: '404',
@@ -68,9 +88,31 @@ app.listen(58270, function () {
 
 
 async function pingprojects() {
+    sm = sitemap({
+        route: {
+            '/': {
+                lastmod: fs.statSync(path.join(process.cwd(), 'views', 'home.ejs')).mtime.toISOString().split('T')[0],
+                priority: 1,
+            },
+            '/commissions': {
+                lastmod: fs.statSync(path.join(STORAGE_DIR, 'commissions.json')).mtime.toISOString().split('T')[0],
+                priority: .8,
+            },
+            '/projects': {
+                lastmod: new Date(getprojects().map(e => e.date || 0).sort((a, b) => b - a)[0]).toISOString().split('T')[0],
+                changefreq: 'hourly',
+                priority: .8,
+            },
+            '*': {
+                hide: true
+            }
+
+        }
+    })
+    sm.generate(app);
     var json = getprojects();
     for (var i = 0; i < json.length; i++) {
-        
+
         if (json[i].pings && json[i].pings.length >= 0) {
             var dif = Math.floor((Date.now() - (json[i].date || 0)) / (60 * 60 * 1000));
             if (dif >= 1) {
