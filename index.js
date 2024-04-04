@@ -113,7 +113,7 @@ void (async () => {
             }
             heart.ended_at = Date.now();
             service.hearts.push(heart);
-            services.hearts = service.hearts.filter(heart => heart.ended_at > Date.now() - 48 * 60 * 60 * 1000);
+            service.hearts = service.hearts.filter(heart => heart.ended_at > Date.now() - 48 * 60 * 60 * 1000);
 
             services.services[i] = service;
             saveJSONServices(services);
