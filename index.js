@@ -115,7 +115,7 @@ void (async () => {
             service.hearts.push(heart);
 
             var hr = [];
-            for (let i = Date.now(), j = 0; j < 24; i -= 60 * 60 * 1000, j++) {
+            for (let i = Date.now(), j = 0; j < 48; i -= 60 * 60 * 1000, j++) {
                 var di = new Date(i);
                 di = new Date(di.getFullYear(), di.getMonth(), di.getDate(), di.getHours());
                 let h = service.hearts
@@ -125,7 +125,6 @@ void (async () => {
                         return dh.getTime() == di.getTime();
                     }).sort((a, b) => a.response > 0 ? -1 : 1);
                 if (h.length == 0) continue;
-
                 hr.push(h[0]);
             }
             service.hearts = hr;
