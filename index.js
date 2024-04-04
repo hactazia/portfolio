@@ -84,7 +84,7 @@ void (async () => {
     await sleep(1000);
     services.started_at = Date.now();
     saveJSONServices(services);
-    var  init = true;
+    var init = true;
     while (true) {
         for (let i = 0; i < services.services.length; i++) {
             let service = services.services[i];
@@ -95,7 +95,7 @@ void (async () => {
             if (lastHeart && !init) {
                 var d = new Date();
                 var l = new Date(lastHeart.ended_at);
-                if(d.getHours() == l.getHours() && d.getDate() == l.getDate() && d.getMonth() == l.getMonth() && d.getFullYear() == l.getFullYear())
+                if (d.getHours() == l.getHours() && d.getDate() == l.getDate() && d.getMonth() == l.getMonth() && d.getFullYear() == l.getFullYear())
                     continue;
             }
             console.log(`Checking service ${service.url}`);
@@ -113,7 +113,22 @@ void (async () => {
             }
             heart.ended_at = Date.now();
             service.hearts.push(heart);
-            service.hearts = service.hearts.filter(heart => heart.ended_at > Date.now() - 48 * 60 * 60 * 1000);
+
+            var hr = [];
+            for (let i = Date.now(), j = 0; j < 24; i -= 60 * 60 * 1000, j++) {
+                var di = new Date(i);
+                di = new Date(di.getFullYear(), di.getMonth(), di.getDate(), di.getHours());
+                let h = service.hearts
+                    .filter(heart => {
+                        var dh = new Date(heart.ended_at);
+                        dh = new Date(dh.getFullYear(), dh.getMonth(), dh.getDate(), dh.getHours());
+                        return dh.getTime() == di.getTime();
+                    }).sort((a, b) => a.response > 0 ? -1 : 1);
+                if (h.length == 0) continue;
+
+                hr.push(h[0]);
+            }
+            service.hearts = hr;
 
             services.services[i] = service;
             saveJSONServices(services);
