@@ -390,10 +390,16 @@ the second centred and very big, and the last is aligned to right */
     flex-direction: row;
 }
 
-#services-body .card .card-content .card-title h1 {
+#services-body .card .card-content .card-title h2 {
     font-family: 'Rubik Mono One', sans-serif;
     font-size: 1.5rem;
     width: 100%;
+}
+#services-body .card .card-content .card-title img {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: .5rem;
+    align-self: center;
 }
 
 #services-body .card .card-content .card-description {

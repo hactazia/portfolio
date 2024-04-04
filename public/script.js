@@ -306,7 +306,8 @@ window.addEventListener('load', function () {
                 <div class="card">
                   <div class="card-content" style="background: ${service.data.background || '#fff'}; color: ${service.data.color || '#000'}">
                     <div class="card-title">
-                        <h1>${service.data.title}</h2>
+                        ${service.data.icon ? `<img src="${service.data.icon}" alt="icon">` : ''}
+                        <h2>${service.data.title}</h2>
                     </div>
                     <div class="card-description">
                         <p>${service.data.description}</p>
@@ -319,9 +320,9 @@ window.addEventListener('load', function () {
                         if (heart.response === 200) {
                             if (heart.ping < 0)
                                 return '--heart-unknown';
-                            else if (heart.ping < 100)
+                            else if (heart.ping < 250)
                                 return '--heart-fast';
-                            else if (heart.ping < 200)
+                            else if (heart.ping < 500)
                                 return '--heart-medium';
                             else return '--heart-slow';
                         } else if (heart.response === 0)
