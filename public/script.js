@@ -278,9 +278,11 @@ window.addEventListener('load', function () {
                 // for each hour (on 24)
                 for (var i = Date.now(), j = 0; j < 24; i -= 3600000, j++) {
                     var di = new Date(i);
+                    di = new Date(di.getFullYear(), di.getMonth(), di.getDate(), di.getHours());
                     var heart = service.hearts.find(heart => {
                         var ds = new Date(heart.started_at);
-                        return di.getHours() === ds.getHours() && di.getDate() === ds.getDate() && di.getMonth() === ds.getMonth() && di.getFullYear() === ds.getFullYear();
+                        ds = new Date(ds.getFullYear(), ds.getMonth(), ds.getDate(), ds.getHours());
+                        return ds.getTime() == di.getTime();
                     });
                     if (heart) {
                         hearts.push({
@@ -325,7 +327,7 @@ window.addEventListener('load', function () {
                         } else if (heart.response === 0)
                             return '--heart-unknown';
                         else return '--heart-error';
-                    })()});"></li>
+                    })()});" data-ping="${heart.ping}" data-date="${heart.at.toISOString()}" data-response="${heart.response}"></li>
                             `).join('')}
                         </ul>
                     </div>
