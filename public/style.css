@@ -1,0 +1,497 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik+Mono+One&display=swap');
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+    --color-primary: #d2d4d3;
+    --color-secondary: #f5f5f5;
+    --background-primary: #4f2a86;
+    --background-secondary: #270f3e;
+    --background-light: #f5f5f5;
+    --color-light: #333;
+
+    --heart-unknown: #d2d4d3;
+    --heart-fast: #79ff6d;
+    --heart-medium: #ffbb69;
+    --heart-slow: #ffeb77;
+    --heart-error: #ff6969;
+
+    transition: all .1s ease;
+}
+
+html {
+    height: 100%;   
+    position: relative;
+}
+
+html {
+    font-family: 'Roboto', sans-serif;
+    /* background with gradient */
+    background: url('/background.png') 
+        no-repeat center center/cover fixed,
+    radial-gradient(circle at top,
+            var(--background-primary) 0%,
+            var(--background-secondary) 100%) fixed;
+    color: var(--color-primary);
+    user-select: none;
+    overflow: hidden;
+}
+
+
+a {
+    text-decoration: none;
+    color: currentColor;
+}
+
+a:hover {
+    text-shadow: 0 0 1rem var(--color-primary);
+}
+
+header {
+    padding: 2rem 4rem;
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+
+    /* blur background */
+    backdrop-filter: blur(10px);
+    z-index: 100;
+}
+
+header .left {
+    display: flex;
+    align-items: center;
+}
+
+header .center {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    color: var(--color-primary);
+}
+
+header .center .logo {
+    width: 3rem;
+    height: 3rem;
+    fill: var(--color-primary);
+}
+
+header .right {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
+
+/* list in header is on line, with space between */
+header ul {
+    list-style: none;
+    display: flex;
+}
+
+header ul li:not(:last-child) {
+    margin-right: 3rem;
+}
+
+header ul li a {
+    text-decoration: none;
+    color: var(--color-primary);
+    font-weight: 500;
+    letter-spacing: .25em;
+}
+
+.container {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100vh;
+}
+
+/* i have 3 div, the first is aligned to left,
+the second centred and very big, and the last is aligned to right */
+
+#named-section {
+    width: min-content;
+    /* capitalize */
+}
+
+#named-section .left {
+    text-align: left;
+    margin-left: 2rem;
+    text-transform: uppercase;
+    letter-spacing: .25em;
+}
+
+#named-section .center {
+    font-size: 5vw;
+    font-family: 'Rubik Mono One', sans-serif;
+    color: var(--color-secondary);
+}
+
+#named-section .right {
+    text-align: right;
+    margin-right: 3rem;
+    text-transform: uppercase;
+    letter-spacing: .25em;
+}
+
+#medias {
+    /* make a social media in bottom left with icons */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    padding: 4rem;
+    display: flex;
+    align-items: center;
+    z-index: 100;
+}
+
+#medias ul {
+    list-style: none;
+}
+
+#medias ul li:not(:last-child) {
+    margin-bottom: 2rem;
+}
+
+#medias ul li a {
+    text-decoration: none;
+    color: var(--color-primary);
+    font-size: 1.5rem;
+}
+
+#background-socials {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    translate: none;
+    z-index: -1;
+}
+
+#background-socials .cursor {
+    position: absolute;
+    width: 4rem;
+    height: 4rem;
+    background: var(--color-primary);
+    opacity: .5;
+    border-radius: 50%;
+    pointer-events: none;
+    transition: none;
+    transform: translate(-50%, -50%);
+    translate: none;
+    filter: blur(2em);
+}
+
+#background-socials .message {
+    transform: translate(-50%, -50%);
+    position: absolute;
+    top: 0;
+    left: 0;
+    animation: message 11s infinite;
+}
+
+@keyframes message {
+    0% {
+        filter: blur(100vw);
+    }
+    25% {
+        filter: blur(0);
+    }
+    75% {
+        filter: blur(0);
+    }
+    100% {
+        filter: blur(100vw);
+        opacity: 0;
+    }
+}
+/* flex bettween */
+#about-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5rem;
+}
+
+#about-section .right {
+    width: 50%;
+    text-align: right;
+}
+
+#about-section .right .card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#about-section .card-content {
+    border: solid 1px var(--background-primary);
+    border-radius: .25rem;
+    box-shadow: 0 0 2rem rgba(0, 0, 0, .5);
+    background-color: #2b2b2b;
+}
+
+#about-section .left {
+    width: 50%;
+    text-align: left;
+}
+
+#about-section .left h1 {
+    font-size: 3rem;
+    font-family: 'Rubik Mono One', sans-serif;
+}
+
+.section-container {
+    background: radial-gradient(circle at top,
+            var(--background-primary) 0%,
+            var(--background-secondary) 100%);
+    color: var(--color-primary);
+    box-shadow: 0 0 2rem rgba(0, 0, 0, .5);
+    border: solid 1px var(--background-primary);
+    border-radius: 1rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    width: 50vw;
+    max-height: calc(100% - 6.5rem);
+    margin-top: 6.5rem;
+}
+
+.section-container .header {
+    text-align: center;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+.section-container .header h1 {
+    font-size: 2rem;
+    font-family: 'Rubik Mono One', sans-serif;
+    padding-bottom: 1rem;
+    border-bottom: solid 1px var(--background-primary);
+    width: 100%;
+}
+
+.section-container .body {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: top;
+    align-items: center;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: auto;
+}
+
+.section-container .card {
+    width: 32rem;
+    min-height: 8rem;
+    margin-bottom: 1rem;
+}
+
+.card {
+    perspective: 1000px;
+}
+
+.section-container .card:last-child {
+    margin-bottom: 0;
+}
+
+.section-container .card .card-content {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: .5rem;
+    border: solid 1px var(--background-primary);
+}
+
+.card .card-content {
+    overflow: hidden;
+    transition: all .05s ease-out;
+}
+.card .glow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    transition: all .05s ease-out;
+    border-radius: .5rem;
+    mix-blend-mode: hard-light;
+    pointer-events: none;
+}
+
+.section-container .card {
+    max-width: 100%;
+}
+
+.section-container .card .card-content {
+    background: linear-gradient(75deg, #7289DA, #5865F2);
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2rem 3rem;
+    
+}
+
+.section .card .left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50%;
+    font-size: 2.5rem;
+}
+
+.section-container .card .right{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 50%;
+}
+
+.section-container .card.instagram .card-content {
+    background: linear-gradient(45deg, #e7b300, #ff6710, #b02429, #e7008a, #c000b3);
+    color: var(--color-primary);
+}
+
+.section-container .card.github .card-content {
+    background: linear-gradient(6deg, #24292E, #6e5494);
+    color: var(--color-primary);
+}
+
+.section-container .card.mail .card-content {
+    background: linear-gradient(45deg, #ffbab4, #ffeeb6);
+    color: var(--color-light);
+}
+
+#services-body .card {  
+    min-height: 8rem;
+    height: auto;
+}
+
+#services-body .card .card-content {  
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem 3rem;
+}
+
+#services-body .card .card-content .card-title {
+    display: flex;
+    flex-direction: row;
+}
+
+#services-body .card .card-content .card-title h1 {
+    font-family: 'Rubik Mono One', sans-serif;
+    font-size: 1.5rem;
+    width: 100%;
+}
+
+#services-body .card .card-content .card-description {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+#services-body .card .card-content .card-hearts {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    margin-bottom: 1rem;
+    border-radius: .25rem;
+    overflow: hidden;
+    max-width: 100%;
+    border: solid 1px var(--background-primary);
+
+}
+
+#services-body .card .card-content .card-hearts ul {
+    display: flex;
+    list-style: none;
+}
+
+#services-body .card .card-content .card-hearts ul li {
+    width: 1rem;
+    height: 1rem;
+}
+
+
+
+@media screen and (max-width: 768px) {
+    header {
+        padding: 2rem;
+    }
+
+    header .left {
+        margin-right: auto;
+    }
+
+    header .right {
+        display: none;
+    }
+
+    header ul li:not(:last-child) {
+        margin-right: 2rem;
+    }
+
+    #medias {
+        padding: 2rem;
+    }
+
+    #named-section .left, 
+    #named-section .right {
+        margin: 0;
+        text-align: center;
+    }
+
+    #named-section {
+        width: 100%;
+    }
+
+    #named-section .center {
+        font-size: 8vw;
+    }
+
+    #about-section {
+        flex-direction: column;
+        padding: 2rem;
+    }
+
+    #about-section .right {
+        width: 100%;
+        text-align: center;
+    }
+
+    #about-section .left {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .section-container {
+        width: 100%;
+    }
+    .section-container .card .left {
+        display: none;
+    }
+
+    .section-container .card .right {
+        width: 100%;
+    }
+
+    .section-container .card {
+        min-height: 8rem;
+    }
+
+    #medias {
+        display: none;
+    }
+}

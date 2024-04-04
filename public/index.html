@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="script.js"></script>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <meta property="og:title" content="Hactazia's Portfolio" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="http://7.tcp.eu.ngrok.io:10699/" />
+  <meta property="og:image" content="http://7.tcp.eu.ngrok.io:10699/background.png" />
+  <meta property="og:description" content="Welcome to my portfolio" />
+  <meta name="theme-color" content="#4f2a86" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#4f2a86" />
+</head>
+
+<body>
+  <header>
+    <div class="left">
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+    </div>
+    <div class="center">
+      <div class="card">
+        <div class="card-content">
+          <img src="logo.svg" alt="logo" class="logo" />
+        </div>
+      </div>
+    </div>
+    <div class="right">
+      <ul>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <div id="medias">
+    <ul>
+      <li>
+        <a href="https://discord.gg/5xJcdqk7we">
+          <i class="bi bi-discord"></i>
+        </a>
+      </li>
+      <li>
+        <a href="https://github.com/hactazoff">
+          <i class="bi bi-github"></i>
+        </a>
+      </li>
+      <li>
+        <a href="mailto:hactazia@gmail.com">
+          <i class="bi bi-envelope-fill"></i>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <section class="container active section" id="home">
+    <div id="named-section">
+      <div class="left">I am a junior developer</div>
+
+      <div class="center">
+        <h1>Hactazia</h1>
+      </div>
+
+      <div class="right">Welcome to my portfolio</div>
+    </div>
+  </section>
+
+  <section class="container section" id="about">
+    <div id="about-section">
+      <div class="left">
+        <h1>About me</h1>
+        <p>
+          I am a junior developer, I am passionate about web development and I
+          am always looking for new challenges. I am currently learning React
+          and I am looking for an internship to improve my skills.
+        </p>
+      </div>
+      <div class="right">
+        <div class="card">
+          <div class="card-content">
+            <img src="about.png" alt="about" />
+          </div>
+          <div class="glow"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="container section" id="services">
+    <div id="services-section" class="section-container">
+      <div class="header">
+        <h1>Services</h1>
+      </div>
+      <div class="body" id="services-body">Loading...</div>
+    </div>
+  </section>
+  <section class="container section" id="contact">
+    <div id="contact-section" class="section-container">
+      <div class="header">
+        <h1>Contact me</h1>
+      </div>
+      <div class="body scrollable">
+        <div class="card discord">
+          <div class="card-content">
+            <div class="left">
+              <h1><i class="bi bi-discord"></i></h1>
+            </div>
+            <div class="right">
+              <h2>Discord</h2>
+              <p>@hactazia</p>
+              <p>
+                <a href="https://discord.gg/5xJcdqk7we">
+                  <span>Join my server</span>
+                  <i class="bi bi-arrow-right"></i>
+                </a>
+              </p>
+            </div>
+          </div>
+          <div class="glow"></div>
+        </div>
+        <div class="card github">
+          <div class="card-content">
+            <div class="left">
+              <h1><i class="bi bi-github"></i></h1>
+            </div>
+            <div class="right">
+              <h2>Github</h2>
+              <p>@hactazoff</p>
+              <p>
+                <a href="https://github.com/hactazoff">
+                  <span>Visit my profile</span>
+                  <i class="bi bi-arrow-right"></i>
+                </a>
+              </p>
+            </div>
+          </div>
+          <div class="glow"></div>
+        </div>
+        <div class="card mail">
+          <div class="card-content">
+            <div class="left">
+              <h1><i class="bi bi-envelope-fill"></i></h1>
+            </div>
+            <div class="right">
+              <h2>Email</h2>
+              <p>hactazia@gmail.com</p>
+              <p>
+                <a href="mailto:hactazia@gmail.com">
+                  <span>Send me an email</span>
+                  <i class="bi bi-arrow-right"></i>
+                </a>
+              </p>
+            </div>
+          </div>
+          <div class="glow"></div>
+        </div>
+        <div class="card instagram">
+          <div class="card-content">
+            <div class="left">
+              <h1><i class="bi bi-instagram"></i></h1>
+            </div>
+            <div class="right">
+              <h2>Instagram</h2>
+              <p>@hactazia</p>
+              <p>
+                <a href="https://www.instagram.com/hactazia/">
+                  <span>Follow me</span>
+                  <i class="bi bi-arrow-right"></i>
+                </a>
+              </p>
+            </div>
+          </div>
+          <div class="glow"></div>
+        </div>
+      </div>
+  </section>
+
+  <footer>
+    <div id="background-socials"></div>
+  </footer>
+</body>
+
+</html>

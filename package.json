@@ -1,28 +1,16 @@
 {
-  "name": "www",
+  "name": "portfolio",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node ."
+    "start": "node index.js"
   },
-  "pm2": [
-    {
-      "name": "web",
-      "script": "index.js"
-    },
-    {
-      "name": "proxy",
-      "script": "cloudflared tunnel run --url localhost:58270 www"
-    }
-  ],
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ejs": "^3.1.9",
-    "express": "^4.18.2",
-    "express-sitemap": "^1.8.0",
-    "node-fetch": "^3.3.1"
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
   }
 }
