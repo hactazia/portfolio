@@ -1,0 +1,11 @@
+{
+  "name": "portfolio",
+  "private": true,
+  "packageManager": "pnpm@10.15.0",
+  "scripts": {
+    "build": "pnpm --filter @portfolio/common build && pnpm --filter backend build && pnpm --filter frontend build",
+    "dev": "pnpm --filter @portfolio/common build && pnpm --parallel --filter backend --filter frontend dev",
+    "lint": "pnpm --parallel --filter backend --filter frontend lint",
+    "test": "pnpm --filter backend test"
+  }
+}
