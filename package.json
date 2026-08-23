@@ -3,9 +3,14 @@
   "private": true,
   "packageManager": "pnpm@10.15.0",
   "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "build": "pnpm --filter @portfolio/common build && pnpm --filter backend build && pnpm --filter frontend build",
-    "dev": "pnpm --filter @portfolio/common build && pnpm --parallel --filter backend --filter frontend dev",
+    "dev": "pnpm --filter @portfolio/common build && sh -c 'set -a; [ ! -f .env ] || . ./.env; set +a; pnpm --parallel --filter backend --filter frontend dev'",
     "lint": "pnpm --parallel --filter backend --filter frontend lint",
     "test": "pnpm --filter backend test"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.6"
   }
 }

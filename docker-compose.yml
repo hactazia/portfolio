@@ -8,5 +8,5 @@ services:
       PORT: 3000
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3001}
     ports:
-      - "${BACKEND_PORT:-3000}:3000"
+      - '${BACKEND_PORT:-3000}:3000'
     restart: unless-stopped
