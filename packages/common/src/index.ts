@@ -1,27 +1,72 @@
+export type Translate = string | Record<string, string>;
+
+export interface Server {
+  url: string;
+}
+
 export interface Project {
   slug: string;
-  title: string;
-  description: string;
-  year: number;
+  title: Translate;
+  description: Translate | null;
+  /** URL ou chemin de l'image du projet (peut être vide). */
+  image: string | null;
+  /** URL cible du projet. */
+  url: string | null;
+  year: number | null;
   tags: string[];
-  href: string;
-  featured?: boolean;
+}
+
+export interface ProjectCategory {
+  slug: string;
+  name: Translate;
+  projects: Project[];
+}
+
+/** Collection de projets organisés par catégories. */
+export type ProjectCollection = ProjectCategory[];
+
+export interface Social {
+  type: string;
+  label: Translate | null;
+  value: string;
+}
+
+export interface Fee {
+  available: boolean;
 }
 
 export interface Profile {
-  name: string;
-  role: string;
+  name: Translate;
+  role: Translate;
   location: string;
-  bio: string;
-  email: string;
-  discord: string;
+  bio: Translate;
+  socials: Social[];
 }
 
 export interface PortfolioResponse {
+  server: Server;
   profile: Profile;
-  projects: Project[];
+  fee: Fee;
+  /** Projets organisés par catégories. */
+  projects: ProjectCollection;
 }
 
 export const API_ROUTES = {
   portfolio: '/portfolio',
+  github: '/github/contributions',
 } as const;
+
+export interface GitHubContributionDay {
+  date: number; // timestamp
+  count: number;
+}
+
+export interface GitHubContributionWeek {
+  date: number; // timestamp
+  days: GitHubContributionDay[];
+}
+
+export interface GitHubData {
+  total: number;
+  weeks: GitHubContributionWeek[];
+}

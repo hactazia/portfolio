@@ -1,0 +1,70 @@
+{
+  "server": { "url": "http://archlinux.local:3000" },
+  "profile": {
+    "name": "Hactazia",
+    "role": "",
+    "location": "France · Disponible à distance",
+    "bio": "",
+    "socials": [
+      {
+        "type": "email",
+        "label": "Mail",
+        "value": "mailto:contact@hactazia.fr"
+      },
+      {
+        "type": "discord",
+        "label": "Discord",
+        "value": "https://discord.com/users/hactazia"
+      },
+      {
+        "type": "github",
+        "label": "Github",
+        "value": "https://github.com/hactazia"
+      },
+      {
+        "type": "vrchat",
+        "label": "VRChat",
+        "value": "https://vrchat.com/home/user/usr_b59713dd-02ef-424c-afa8-78b60c2d5119"
+      },
+      {
+        "type": "mastodon",
+        "label": "Mastodon",
+        "value": "https://masto.hactazia.fr/@hactazia"
+      }
+    ]
+  },
+  "fee": { "available": true },
+  "projects": [
+    {
+      "slug": "web",
+      "name": "Web",
+      "projects": [
+        {
+          "slug": "projet-exemple",
+          "title": "Projet exemple",
+          "description": "Remplacez cet exemple par une réalisation et son impact.",
+          "image": "",
+          "url": "",
+          "year": 2026,
+          "tags": ["Next.js", "NestJS"],
+          "featured": true
+        }
+      ]
+    },
+    {
+      "slug": "vr",
+      "name": "Réalité virtuelle",
+      "projects": [
+        {
+          "slug": "vr-exemple",
+          "title": "Projet VR exemple",
+          "description": "Remplacez cet exemple par une expérience immersive et son impact.",
+          "image": "",
+          "url": "",
+          "year": 2026,
+          "tags": ["Unity", "VR"]
+        }
+      ]
+    }
+  ]
+}

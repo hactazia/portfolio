@@ -10,3 +10,18 @@ services:
     ports:
       - '${BACKEND_PORT:-3000}:3000'
     restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+      NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH:-}
+    ports:
+      - '${FRONTEND_PORT:-3001}:3000'
+    depends_on:
+      - backend
+    restart: unless-stopped

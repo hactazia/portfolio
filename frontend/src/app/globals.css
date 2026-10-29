@@ -3,31 +3,33 @@
 @tailwind utilities;
 
 :root {
-  --background: 240 20% 4%;
-  --foreground: 240 100% 90%;
-  --card: 240 20% 8%;
-  --card-foreground: 240 100% 90%;
-  --popover: 240 20% 8%;
-  --popover-foreground: 240 100% 90%;
-  --primary: 240 100% 90%;
-  --primary-foreground: 240 20% 4%;
-  --secondary: 240 12% 15%;
-  --secondary-foreground: 240 100% 90%;
-  --muted: 240 10% 60%;
-  --muted-foreground: 240 10% 60%;
-  --accent: 240 12% 15%;
-  --accent-foreground: 240 100% 90%;
-  --destructive: 0 70% 55%;
+  /* Thème clair : fond blanc neutre, CCCCFF (primaire), FFD9CC (secondaire) */
+  --primary: 240 100% 90%; /* #CCCCFF */
+  --primary-foreground: 240 55% 26%; /* indigo foncé, lisible sur fond clair et sur #CCCCFF */
+  --brand: 240 55% 38%; /* indigo lisible pour les textes d'accent sur fond clair */
+
+  --background: 40 30% 98%; /* blanc cassé neutre */
+  --foreground: 240 35% 16%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 35% 16%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 35% 16%;
+  --secondary: 15 100% 90%; /* #FFD9CC */
+  --secondary-foreground: 15 45% 22%;
+  --muted: 40 30% 96%;
+  --muted-foreground: 240 12% 42%;
+  --accent: 15 100% 90%;
+  --accent-foreground: 15 45% 22%;
+  --destructive: 0 72% 55%;
   --destructive-foreground: 0 0% 100%;
-  --border: 240 12% 22%;
-  --input: 240 12% 26%;
-  --ring: 240 100% 90%;
-  --radius: 0.58rem;
-  --surface: #111117;
-  --paper: #09090d;
-  --primary-color: #ccf;
-  --muted-color: #9999a8;
-  --line: rgba(204, 204, 255, 0.2);
+  --border: 40 20% 88%;
+  --input: 40 20% 88%;
+  --ring: 240 90% 62%;
+
+  --radius: 0.75rem;
+  --line: rgba(62, 58, 102, 0.12);
+
+  color-scheme: light;
 }
 
 @layer base {
@@ -36,13 +38,28 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-funnel), sans-serif;
+    font-family: var(--font-sans), sans-serif;
     overflow-x: hidden;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display), sans-serif;
+  }
+  .font-display {
+    font-family: var(--font-display), sans-serif;
+  }
+  .font-light {
+    font-weight: 300;
   }
 }
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
 }
 
 a {
@@ -53,4 +70,56 @@ a {
 ::selection {
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Utilities */
+@layer utilities {
+  .glass {
+    @apply bg-card/80 backdrop-blur-xl border border-line;
+  }
+}
+
+/* Animations */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Marquee for skills */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
 }

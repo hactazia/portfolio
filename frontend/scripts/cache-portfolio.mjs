@@ -1,12 +1,17 @@
-import { writeFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { writeFile, mkdir } from 'node:fs/promises';
+import { resolve, dirname } from 'node:path';
+
+if (process.env.SKIP_CACHE === 'true') {
+  console.log('Skipping portfolio cache generation (SKIP_CACHE=true)');
+  process.exit(0);
+}
 
 const configuredBackendUrl = process.env.BACKEND_URL ?? 'http://localhost:3001';
 const buildHostname = process.env.HOSTNAME ?? 'localhost';
 const backendUrl = configuredBackendUrl
   .replaceAll('%', buildHostname)
   .replace(/\/$/, '');
-const endpoint = `${backendUrl}/portfolio`;
+const endpoint = `${backendUrl}/portfolio/`;
 async function loadPortfolio() {
   let lastError = new Error(`Unable to fetch portfolio from ${endpoint}`);
 
@@ -30,8 +35,7 @@ async function loadPortfolio() {
 }
 
 const portfolio = await loadPortfolio();
-await writeFile(
-  resolve('src/app/data/portfolio.json'),
-  `${JSON.stringify(portfolio, null, 2)}\n`,
-);
-console.log(`Portfolio cache generated from ${endpoint}`);
+const outputPath = resolve('src/cache/portfolio.json');
+await mkdir(dirname(outputPath), { recursive: true });
+await writeFile(outputPath, `${JSON.stringify(portfolio, null, 2)}\n`);
+console.log(`Portfolio cache generated from ${endpoint} to ${outputPath}`);

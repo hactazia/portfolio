@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title">
+  <title id="title">Hactazia</title>
+  <g fill="currentColor" font-family="Arial, sans-serif" font-size="32" font-weight="700">
+    <text x="20" y="39">H</text>
+    <text x="55" y="39">A</text>
+    <text x="20" y="76">C</text>
+    <text x="55" y="76">T</text>
+  </g>
+</svg>
