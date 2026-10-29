@@ -110,11 +110,32 @@ when offscreen, and renders a single static frame under `prefers-reduced-motion`
 
 `.github/workflows/deploy.yml` builds and publishes `out/`.
 
-1. Push the repository.
-2. **Settings → Pages → Source: GitHub Actions**.
+1. Push the repository (the workflow runs on `v3` or by hand).
+2. **Settings → Pages → Source: GitHub Actions** — already enabled here.
 
-`basePath` is auto-detected: `/<repo>` for project pages, `""` for a user page or when a
-`public/CNAME` exists. Override with `NEXT_PUBLIC_BASE_PATH`.
+Without a `public/CNAME`, `basePath` is auto-detected as `/<repo>`, so the site is live at
+**<https://hactazia.github.io/portfolio/>**.
+
+### Custom domain (`www.hactazia.fr`)
+
+`www.hactazia.fr` is currently claimed by **another Pages site**, so GitHub refuses it here
+(`Invalid cname … already taken`). To move it:
+
+1. Release the domain from that other repository (Pages → Custom domain → remove).
+2. Add `public/CNAME` containing `www.hactazia.fr` — `next.config.ts` then resolves
+   `basePath` to `""`, so the site is served from the root.
+3. Pages → Custom domain: `www.hactazia.fr`, then check *Enforce HTTPS*.
+
+| Hostname             | Record                                                              |
+| -------------------- | ------------------------------------------------------------------- |
+| `www.hactazia.fr`    | `CNAME` → `hactazia.github.io`                                       |
+| `hactazia.fr` (apex) | `A` → `185.199.108.153`, `.109.153`, `.110.153`, `.111.153`          |
+| `hi.hactazia.fr`     | not served by Pages — redirect it to `www` (nginx / registrar)       |
+
+Today `www.hactazia.fr` CNAMEs to `hactazia.fr`, which is served by the NoX server: pointing
+it at Pages means moving that host off the server first. Pages only issues certificates for
+the configured `CNAME` and the apex, so a hostname like `hi.hactazia.fr` has to be a
+redirect, not a second Pages domain.
 
 ## API behind the site
 
@@ -122,7 +143,22 @@ The frontend is a static export, so it never serves its own API. `src/lib/api.ts
 `${NEXT_PUBLIC_API_BASE_URL}/api/<path>`:
 
 - empty (default) → same-origin `/api/*`, forwarded by nginx in the Docker setup (no CORS);
-- `https://api.example.com` → remote API for GitHub Pages (CORS must allow the Pages origin).
+- `https://api.hactazia.fr` → the remote API used by the Pages deployment.
+
+Two build-time variables matter for Pages (set as repo variables in the workflow, with these
+defaults baked in):
+
+| Variable                   | Default                          | Used for                    |
+| -------------------------- | -------------------------------- | --------------------------- |
+| `API_BASE_URL`             | `https://api.hactazia.fr`        | every `fetch` + `/api/assets/*` |
+| `WS_URL`                   | `wss://api.hactazia.fr/ws`       | live cursors (not under `/api`) |
+
+The API side needs, on `api.hactazia.fr`:
+
+- `API_ALLOWED_ORIGINS=https://hactazia.fr,https://www.hactazia.fr,https://hi.hactazia.fr`
+  (the Pages origins calling it cross-origin);
+- the reverse proxy serving `/api/*` **and** upgrading `/ws` (nginx: `proxy_http_version 1.1`
+  + `Upgrade`/`Connection` headers).
 
 `docker compose up --build` runs nginx serving `out/` plus a dependency-free sample API
 (`api/server.mjs`) behind the same origin. Replace the upstream in `nginx/default.conf` to
