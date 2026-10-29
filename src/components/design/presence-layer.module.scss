@@ -1,0 +1,48 @@
+.layer {
+  position: fixed;
+  inset: 0;
+  /* Above every other layer of the page (grain 60, menu overlay 70, nav 80),
+     and the layer is portalled to <body> so no ancestor stacking context can
+     trap it. */
+  z-index: 9999;
+  pointer-events: none;
+  user-select: none;
+  overflow: hidden;
+}
+
+.cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  /* Movement stays snappy; only the *fade* marks a visitor as away. */
+  transition:
+    transform 130ms linear,
+    opacity 500ms ease;
+  will-change: transform, opacity;
+  opacity: 1;
+}
+
+/* No update for a while: the visitor is away, dim the dot. */
+.cursor[data-idle="true"] {
+  opacity: 0.2;
+}
+
+.dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0.875rem;
+  height: 0.875rem;
+  /* Centred on the pointer coordinate (half of the size, both axes). */
+  margin: -0.4375rem 0 0 -0.4375rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor {
+    transition: none;
+  }
+}

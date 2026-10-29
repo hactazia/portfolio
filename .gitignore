@@ -1,0 +1,26 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Next.js
+.next
+out
+next-env.d.ts
+*.tsbuildinfo
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# API content: the real file stays local, api/content.example.json is committed
+api/content.json
+
+# API assets (logos, showcase shots): served by the API, never tracked
+api/assets
+
+# Misc
+.DS_Store
+Thumbs.db
+*.log
+coverage

@@ -1,0 +1,49 @@
+/*
+ * The mark comes from an SVG URL served by the API and is painted through a
+ * CSS mask, so the colour (and its drift) stays in CSS: the file itself only
+ * carries the silhouette.
+ */
+.logo {
+  display: inline-block;
+  flex: none;
+  width: var(--logo-size, 32px);
+  height: var(--logo-size, 32px);
+  background-image: linear-gradient(
+    140deg,
+    #5b5bd6 0%,
+    #ccccff 32%,
+    #50c878 64%,
+    #8f8fe8 100%,
+    #5b5bd6 100%
+  );
+  background-size: 260% 260%;
+  background-position: 0% 50%;
+  -webkit-mask-image: var(--logo-src);
+  mask-image: var(--logo-src);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.animated {
+  animation: logo-drift 14s linear infinite alternate;
+}
+
+@keyframes logo-drift {
+  from {
+    background-position: 0% 50%;
+  }
+
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animated {
+    animation: none;
+  }
+}

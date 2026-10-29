@@ -1,0 +1,93 @@
+@use "sass:map";
+@use "./variables" as v;
+
+/// `@include m.below("md") { ... }`
+@mixin below($name) {
+  $width: map.get(v.$breakpoints, $name);
+
+  @if $width == null {
+    @error "Unknown breakpoint `#{$name}`";
+  }
+
+  @media (max-width: ($width - 0.02px)) {
+    @content;
+  }
+}
+
+/// `@include m.above("lg") { ... }`
+@mixin above($name) {
+  $width: map.get(v.$breakpoints, $name);
+
+  @if $width == null {
+    @error "Unknown breakpoint `#{$name}`";
+  }
+
+  @media (min-width: $width) {
+    @content;
+  }
+}
+
+/// Centered page container.
+@mixin shell($padding: v.$gutter) {
+  width: 100%;
+  max-width: v.$max-width;
+  margin-inline: auto;
+  padding-inline: $padding;
+}
+
+/// Small uppercase mono label used as section eyebrow.
+@mixin label {
+  font-family: var(--d-font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--d-muted);
+}
+
+/// 1px separator.
+@mixin hairline {
+  border-top: 1px solid var(--d-line);
+}
+
+///
+/// Display face, for titles that are not `<h*>` elements (list rows, timeline
+/// roles). `--font-sans` is not emitted as a custom property (Tailwind's
+/// `@theme inline` inlines it), so the last fallback is a plain `sans-serif`.
+@mixin display-face {
+  font-family: var(--font-funnel), var(--font-display), sans-serif;
+}
+
+/// Editorial display heading, set in the display face (Funnel Display).
+@mixin display($size: clamp(2.5rem, 6vw, 5rem)) {
+  margin: 0;
+  @include display-face;
+  font-size: $size;
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
+/// Uniform frost applied behind a cluster of text (navbar items, pills).
+/// The backdrop itself is left to the caller so each element can keep its own
+/// tint.
+@mixin text-blur($radius: 16px) {
+  -webkit-backdrop-filter: blur($radius) saturate(140%);
+  backdrop-filter: blur($radius) saturate(140%);
+}
+
+/// Masked line reveal. Children need `--i` set for the stagger.
+@mixin line-reveal($duration: 1s) {
+  display: block;
+  overflow: hidden;
+
+  > span {
+    display: block;
+    transform: translate3d(0, 110%, 0) rotate(2deg);
+    animation: line-up $duration v.$ease-out-expo forwards;
+    animation-delay: calc(var(--i, 0) * 90ms + 120ms);
+  }
+
+  @content;
+}

@@ -1,0 +1,5 @@
+# The real content stays on the host and is mounted at runtime (`CONTENT_FILE`);
+# the image only ships `content.example.json`.
+content.json
+assets
+node_modules

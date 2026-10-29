@@ -1,0 +1,90 @@
+@use "../../styles/variables" as v;
+
+/*
+ * The scatter zone: an invisible block that only reserves the space the stickers
+ * start in. They are drawn into the page-wide sheet (see `PageShell`), so this
+ * element never clips or frames anything.
+ */
+.zone {
+  min-height: clamp(44rem, 66vw, 58rem);
+}
+
+/*
+ * The one canvas of the pile. It is pinned to the viewport — a document-sized
+ * canvas would be tens of megabytes — and the renderer offsets every sticker by
+ * the current scroll, so the stickers still belong to the page.
+ *
+ * It sits under the die-cut buttons, which stay the only pointer targets.
+ */
+.canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/*
+ * Die-cut fallback: the logo is a mask over a flat fill, so the silhouette is
+ * identical to the canvas version. It is the hit target for the whole life of
+ * the sticker — clicks and drags go through it — and stays visible until the
+ * canvas has something to show.
+ */
+.flat {
+  position: absolute;
+  z-index: 2;
+  border: 0;
+  padding: 0;
+  pointer-events: auto;
+  cursor: grab;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  filter: drop-shadow(0 7px 12px rgb(0 0 0 / 40%));
+  transform: rotate(var(--rot, 0deg));
+  transition:
+    transform 420ms v.$ease-spring,
+    filter 420ms ease,
+    opacity 140ms ease-out;
+  /* `backwards`, not `both`: once it lands, hover styles take over again. */
+  animation: flat-in 620ms v.$ease-out-expo backwards;
+  animation-delay: calc(var(--i, 0) * 35ms);
+
+  &:focus-visible {
+    outline: 2px solid var(--d-accent);
+    outline-offset: 4px;
+  }
+}
+
+/*
+ * The canvas is painting this one. The button stays in place — it is still the
+ * only hit target, and dragging needs it — but it stops being drawn. Keeping it
+ * mounted is what makes the hand-over invisible: same box, same rotation, no
+ * reflow, no blank frame.
+ */
+.painted {
+  opacity: 0;
+  filter: none;
+  animation: none;
+  transition: opacity 140ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flat {
+    transition: none;
+    animation: none;
+  }
+}
+
+@keyframes flat-in {
+  from {
+    opacity: 0;
+    transform: rotate(calc(var(--rot, 0deg) * 1.4)) translateY(-1.5rem) scale(0.82);
+  }
+
+  to {
+    opacity: 1;
+    transform: rotate(var(--rot, 0deg));
+  }
+}

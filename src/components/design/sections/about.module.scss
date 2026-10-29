@@ -1,0 +1,186 @@
+@use "../../../styles/variables" as v;
+@use "../../../styles/mixins" as m;
+
+.section {
+  position: relative;
+  padding-block: v.$section-gap;
+  border-top: 1px solid var(--d-line);
+}
+
+.layout {
+  @include m.shell;
+
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: clamp(2rem, 6vw, 6rem);
+  align-items: start;
+
+  @include m.below("lg") {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.5rem;
+  }
+}
+
+.aside {
+  position: sticky;
+  top: 8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+
+  @include m.below("lg") {
+    position: static;
+  }
+}
+
+.statement {
+  @include m.display(clamp(1.9rem, 3.6vw, 3.4rem));
+
+  max-width: 16ch;
+  font-weight: 500;
+
+  em {
+    font-style: normal;
+    color: var(--d-accent);
+  }
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.paragraph {
+  margin: 0;
+  font-size: clamp(0.95rem, 1.15vw, 1.05rem);
+  line-height: 1.72;
+  color: var(--d-fg-dim);
+  text-wrap: pretty;
+}
+
+/*
+ * Opening paragraph. Declared as a class instead of `:first-of-type` so the
+ * loading skeletons can sit in the same flex flow without stealing the style
+ * from the first real paragraph.
+ */
+.lead {
+  margin: 0;
+  font-size: clamp(1.05rem, 1.45vw, 1.25rem);
+  line-height: 1.6;
+  color: var(--d-fg);
+  text-wrap: pretty;
+}
+
+.stats {
+  display: grid;
+  /* Tracks the number of figures the API sends instead of assuming three. */
+  grid-template-columns: repeat(auto-fit, minmax(min(8rem, 100%), 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--d-line);
+}
+
+.statValue {
+  display: block;
+  font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+
+.statLabel {
+  font-family: var(--d-font-mono);
+  font-size: 0.63rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--d-muted);
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  margin-top: 2rem;
+}
+
+/* Placeholders for the copy while the API answers. */
+.leadSkeleton {
+  width: 100%;
+  height: clamp(2.4rem, 3.4vw, 2.9rem);
+  border-radius: 0.45rem;
+}
+
+.paragraphSkeleton {
+  width: 100%;
+  height: clamp(4.4rem, 6vw, 5.4rem);
+  border-radius: 0.45rem;
+}
+
+/* Placeholders for the figures while the API answers. */
+.statValueSkeleton {
+  width: 3.2rem;
+  height: 1.9rem;
+  border-radius: 0.35rem;
+}
+
+.statLabelSkeleton {
+  width: 4.5rem;
+  height: 0.55rem;
+  margin-top: 0.4rem;
+  border-radius: 0.25rem;
+}
+
+.yearSkeleton {
+  width: 3rem;
+  height: 0.55rem;
+  border-radius: 0.25rem;
+}
+
+.roleSkeleton {
+  width: min(11rem, 70%);
+  height: 0.75rem;
+  border-radius: 0.25rem;
+}
+
+.companySkeleton {
+  width: 6rem;
+  height: 0.7rem;
+  border-radius: 0.25rem;
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 1rem;
+  padding-block: 0.95rem;
+  border-bottom: 1px solid var(--d-line);
+  font-size: 0.88rem;
+
+  @include m.below("sm") {
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    row-gap: 0.2rem;
+  }
+}
+
+.year {
+  font-family: var(--d-font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: var(--d-muted);
+}
+
+.role {
+  @include m.display-face;
+  font-size: 1rem;
+  line-height: 1.35;
+  color: var(--d-fg);
+}
+
+.company {
+  color: var(--d-muted);
+
+  @include m.below("sm") {
+    grid-column: 2;
+  }
+}

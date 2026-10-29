@@ -1,0 +1,15 @@
+{
+  "name": "portfolio-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Minimal reference backend for the portfolio (replace with your own).",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node --watch server.mjs"
+  },
+  "engines": {
+    "node": ">=20.11"
+  }
+}

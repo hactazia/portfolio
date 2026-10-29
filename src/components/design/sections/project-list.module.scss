@@ -1,0 +1,200 @@
+@use "../../../styles/variables" as v;
+@use "../../../styles/mixins" as m;
+
+/* No top border: the hero box already closes itself with a bottom edge. */
+.section {
+  position: relative;
+  padding-block: v.$section-gap;
+}
+
+.layout {
+  @include m.shell;
+
+  display: grid;
+  grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 5rem);
+
+  @include m.below("lg") {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.aside {
+  position: sticky;
+  top: 7.5rem;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  @include m.below("lg") {
+    position: static;
+  }
+}
+
+.asideTitle {
+  @include m.display(clamp(1.75rem, 2.6vw, 2.6rem));
+
+  font-weight: 500;
+}
+
+/* Placeholders for the rows while the API answers. */
+.metaSkeleton {
+  width: 5rem;
+  height: 0.6rem;
+  border-radius: 0.25rem;
+}
+
+.indexSkeleton {
+  width: 1.5rem;
+  height: 0.7rem;
+  border-radius: 0.25rem;
+}
+
+.rowTitleSkeleton {
+  width: min(12rem, 45%);
+  height: 1.1rem;
+  border-radius: 0.3rem;
+}
+
+.rowTagsSkeleton {
+  width: 9rem;
+  height: 0.9rem;
+  border-radius: 999px;
+}
+
+.asideText {
+  margin: 0;
+  max-width: 24rem;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--d-muted);
+}
+
+.asideMeta {
+  display: flex;
+  gap: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--d-line);
+  font-family: var(--d-font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--d-muted);
+}
+
+.list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.25rem;
+  padding-block: clamp(1.15rem, 2.2vw, 1.9rem);
+  border-bottom: 1px solid var(--d-line);
+
+  &:first-child {
+    border-top: 1px solid var(--d-line);
+  }
+
+  @include m.below("sm") {
+    grid-template-columns: 2rem minmax(0, 1fr);
+    row-gap: 0.35rem;
+  }
+}
+
+.index {
+  font-family: var(--d-font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: var(--d-muted);
+}
+
+.rowMain {
+  min-width: 0;
+}
+
+.titleWrap {
+  overflow: hidden;
+}
+
+.title {
+  display: block;
+  @include m.display-face;
+  font-size: clamp(1.5rem, 3.3vw, 2.9rem);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  transform: translate3d(0, 0, 0);
+  transition:
+    transform 520ms v.$ease-out-expo,
+    color 320ms ease;
+}
+
+/* The only two hover effects left: the title slides and turns accent, the
+   arrow fades in. */
+.row:hover .title,
+.row:focus-visible .title {
+  transform: translate3d(0.9rem, 0, 0);
+  color: var(--d-accent);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+}
+
+.tag {
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--d-line);
+  font-family: var(--d-font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--d-fg-dim);
+}
+
+.rowAside {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  font-size: 0.8rem;
+  color: var(--d-muted);
+
+  @include m.below("sm") {
+    grid-column: 2;
+    gap: 0.6rem;
+  }
+}
+
+.arrow {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 50%;
+  border: 1px solid var(--d-line);
+  transform: translate3d(-6px, 6px, 0) scale(0.9);
+  opacity: 0;
+  transition:
+    transform 420ms v.$ease-out-expo,
+    opacity 300ms ease,
+    border-color 300ms ease,
+    color 300ms ease;
+}
+
+.row:hover .arrow,
+.row:focus-visible .arrow {
+  transform: translate3d(0, 0, 0) scale(1);
+  opacity: 1;
+  border-color: var(--d-accent);
+  color: var(--d-accent);
+}

@@ -1,0 +1,180 @@
+@use "../../../styles/variables" as v;
+@use "../../../styles/mixins" as m;
+
+.section {
+  position: relative;
+  padding-block: v.$section-gap;
+  border-top: 1px solid var(--d-line);
+  overflow: clip;
+}
+
+.head {
+  @include m.shell;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.aura {
+  position: absolute;
+  inset: auto 0 -20% 0;
+  height: 70%;
+  opacity: 0.16;
+  pointer-events: none;
+  mask-image: linear-gradient(to bottom, transparent, #000 60%);
+}
+
+.title {
+  @include m.display(clamp(1.9rem, 3.4vw, 3.2rem));
+
+  margin-top: 0.75rem;
+}
+
+.note {
+  max-width: 20rem;
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--d-muted);
+}
+
+/* Generous vertical rhythm between contact rows. */
+.list {
+  @include m.shell;
+
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2rem, 6vw, 5rem);
+  margin-top: clamp(3rem, 8vw, 7rem);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--d-line);
+
+  @include m.below("md") {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+    align-items: start;
+  }
+}
+
+.label {
+  font-family: var(--d-font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--d-muted);
+}
+
+/* Skeletons mirror the real row's three columns so nothing shifts on arrival. */
+.skeletonLabel {
+  width: 6rem;
+  height: 0.7rem;
+  border-radius: 0.25rem;
+
+  @include m.below("md") {
+    width: 4.5rem;
+  }
+}
+
+.skeletonValue {
+  width: min(60%, 26rem);
+  height: clamp(1.5rem, 4.4vw, 3.4rem);
+  border-radius: 0.4rem;
+}
+
+.skeletonIcon {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+}
+
+.value {
+  position: relative;
+  display: inline-block;
+  width: fit-content;
+  @include m.display-face;
+  font-size: clamp(1.5rem, 4.4vw, 3.4rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  transition: color 320ms ease;
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.06em;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 520ms v.$ease-out-expo;
+  }
+}
+
+.row:hover .value {
+  color: var(--d-accent);
+
+  &::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  border: 1px solid var(--d-line);
+  color: var(--d-muted);
+  transition:
+    transform 420ms v.$ease-out-expo,
+    color 300ms ease,
+    border-color 300ms ease;
+
+  @include m.below("md") {
+    display: none;
+  }
+}
+
+.row:hover .icon {
+  transform: rotate(45deg);
+  color: var(--d-accent);
+  border-color: rgb(204 204 255 / 45%);
+}
+
+/* ------------------------------------------------------------- foot note -- */
+
+.footer {
+  @include m.shell;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: clamp(3rem, 7vw, 6rem);
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--d-line);
+  font-size: 0.82rem;
+  color: var(--d-muted);
+}
+
+.dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--d-accent);
+}

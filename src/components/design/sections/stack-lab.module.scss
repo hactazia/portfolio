@@ -1,0 +1,316 @@
+@use "../../../styles/variables" as v;
+@use "../../../styles/mixins" as m;
+
+.section {
+  position: relative;
+  padding-block: v.$section-gap;
+  border-top: 1px solid var(--d-line);
+}
+
+/*
+ * Stacked head: eyebrow, title. It lives in the sticky column, above the file, so
+ * the whole caption block stays put while the pile is being played with.
+ */
+.head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.title {
+  @include m.display(clamp(1.7rem, 2.6vw, 2.4rem));
+
+  margin-top: 0.55rem;
+}
+
+/*
+ * Right column: the file, then its caption. The pair sticks together, so the
+ * card and its note stay beside the pile while it is being played with.
+ */
+.side {
+  position: sticky;
+  top: 7rem;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.85rem, 1.5vw, 1.1rem);
+
+  @include m.below("lg") {
+    position: static;
+  }
+}
+
+.note {
+  margin: 0;
+  padding-inline: 0.25rem;
+  font-size: clamp(0.82rem, 1vw, 0.9rem);
+  line-height: 1.7;
+  color: var(--d-muted);
+  text-wrap: pretty;
+}
+
+/*
+ * Two columns: the caption column (head, file, note) sticks beside the pile —
+ * the playground takes the wider side and can scroll on its own.
+ */
+.split {
+  @include m.shell;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.55fr);
+  gap: clamp(1rem, 2vw, 1.75rem);
+  align-items: start;
+
+  @include m.below("lg") {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.pile {
+  position: relative;
+
+  @include m.below("lg") {
+    order: -1;
+  }
+}
+
+.pending {
+  position: relative;
+  min-height: clamp(44rem, 66vw, 58rem);
+
+  @include m.below("lg") {
+    min-height: clamp(34rem, 96vw, 44rem);
+  }
+}
+
+.stickerSkeleton {
+  position: absolute;
+  border-radius: 0.75rem;
+}
+
+/* ----------------------------------------------------------------- file -- */
+
+/*
+ * The file card. Not sticky: the caption sits under it, so the card scrolls with
+ * its column instead of hovering over the note.
+ */
+.panel {
+  display: flex;
+  padding: clamp(1.25rem, 2vw, 1.75rem);
+  border: 1px solid var(--d-line);
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, var(--d-bg-raise) 45%, transparent);
+}
+
+.file {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: clamp(1rem, 2vw, 1.4rem);
+  animation: file-in 420ms v.$ease-out-expo both;
+}
+
+.fileTop {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.fileMark {
+  flex: none;
+  width: clamp(2.75rem, 4vw, 3.5rem);
+  height: clamp(2.75rem, 4vw, 3.5rem);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  filter: drop-shadow(0 4px 10px rgb(0 0 0 / 40%));
+}
+
+.fileEyebrow {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-family: var(--d-font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--d-muted);
+}
+
+.fileName {
+  @include m.display(clamp(1.6rem, 2.6vw, 2.2rem));
+
+  letter-spacing: -0.03em;
+}
+
+.fileNote {
+  margin: 0;
+  font-size: clamp(0.9rem, 1.1vw, 0.98rem);
+  line-height: 1.65;
+  color: var(--d-fg-dim);
+  text-wrap: pretty;
+}
+
+/* The libraries the tool drags along, read from the repositories. */
+.fileAlso {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    padding: 0.28rem 0.55rem;
+    border: 1px solid var(--d-line);
+    border-radius: 999px;
+    font-family: var(--d-font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    color: var(--d-fg-dim);
+    background: color-mix(in srgb, var(--d-bg-raise) 70%, transparent);
+  }
+}
+
+.fileAlsoLabel {
+  font-family: var(--d-font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--d-muted);
+}
+
+.fileMeta {
+  display: flex;
+  gap: 2rem;
+  margin: 0;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--d-line);
+
+  dt {
+    font-family: var(--d-font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--d-muted);
+  }
+
+  dd {
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
+    color: var(--d-fg-dim);
+  }
+}
+
+.fileLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  align-self: flex-start;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--d-line-strong);
+  font-family: var(--d-font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  color: var(--d-fg-dim);
+  transition:
+    color 240ms ease,
+    border-color 240ms ease;
+
+  svg {
+    transition: transform 320ms v.$ease-out-expo;
+  }
+
+  &:hover {
+    color: var(--d-accent);
+    border-bottom-color: currentColor;
+
+    svg {
+      transform: translate3d(2px, -2px, 0);
+    }
+  }
+}
+
+/* ------------------------------------------------------------- skeletons -- */
+
+.fileMarkSkeleton {
+  flex: none;
+  width: clamp(2.75rem, 4vw, 3.5rem);
+  height: clamp(2.75rem, 4vw, 3.5rem);
+  border-radius: 0.6rem;
+}
+
+.fileEyebrowSkeleton {
+  width: 7rem;
+  height: 0.6rem;
+  margin-bottom: 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.fileNameSkeleton {
+  width: 9rem;
+  height: 1.5rem;
+  border-radius: 0.35rem;
+}
+
+.fileNotes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fileLineSkeleton {
+  width: 100%;
+  height: 0.7rem;
+  border-radius: 0.25rem;
+}
+
+.fileLineSkeletonShort {
+  width: 62%;
+  height: 0.7rem;
+  border-radius: 0.25rem;
+}
+
+/*
+ * The pile is drawn on canvases, so the tools are also listed here: same
+ * destinations, readable by a screen reader and a crawler, invisible on screen.
+ */
+.srList {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  list-style: none;
+}
+
+@keyframes file-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .file {
+    animation: none;
+  }
+
+  .fileLink,
+  .fileLink svg {
+    transition: none;
+  }
+}

@@ -1,0 +1,246 @@
+@use "../../../styles/variables" as v;
+@use "../../../styles/mixins" as m;
+
+/*
+ * Curtain-reveal footer.
+ * The layer is pinned to the viewport and painted *behind* the page body
+ * (`.content`, z-index 1), so its background fills the whole area the body
+ * uncovers. The content itself is anchored to the bottom edge.
+ *
+ * The panel is deliberately lighter and violet-tinted so it reads as a
+ * separate surface from the near-black body.
+ */
+.footer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  background:
+    radial-gradient(85% 58% at 50% 72%, rgb(80 200 120 / 26%) 0%, transparent 62%),
+    radial-gradient(60% 40% at 12% 100%, rgb(204 204 255 / 8%) 0%, transparent 70%),
+    linear-gradient(to bottom, #101321 0%, #0b0d16 46%, #06060c 100%);
+}
+
+.inner {
+  @include m.shell;
+
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2rem, 4vw, 3.25rem);
+  padding-block: clamp(2.5rem, 5vw, 4rem) 0;
+}
+
+.top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: clamp(2rem, 6vw, 6rem);
+  align-items: start;
+
+  @include m.below("md") {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.5rem;
+  }
+}
+
+.brandBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  max-width: 26rem;
+}
+
+.tagline {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.62;
+  color: var(--d-muted);
+  text-wrap: pretty;
+}
+
+/* Placeholders keep the block's geometry while /api/site is in flight. */
+.wordmarkSkeleton {
+  width: 8rem;
+  height: 1.6rem;
+  border-radius: 0.4rem;
+}
+
+.taglineSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lineSkeleton {
+  width: 100%;
+  height: 0.75rem;
+  border-radius: 0.25rem;
+}
+
+.lineSkeletonShort {
+  width: 62%;
+  height: 0.75rem;
+  border-radius: 0.25rem;
+}
+
+.ctaSkeleton {
+  width: 7.5rem;
+  height: 2.85rem;
+  border-radius: 999px;
+}
+
+.columnTitleSkeleton {
+  width: 4rem;
+  height: 0.65rem;
+  margin-bottom: 0.9rem;
+  border-radius: 0.25rem;
+}
+
+.markSkeleton {
+  display: block;
+  width: 70%;
+  height: 0.42em;
+  margin-inline: auto;
+  border-radius: 0.25rem;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: fit-content;
+  height: 2.85rem;
+  padding-inline: 1.3rem;
+  border-radius: 999px;
+  background: var(--d-accent);
+  color: #08080f;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition:
+    transform 320ms v.$ease-out-expo,
+    box-shadow 320ms ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 36px -18px rgb(204 204 255 / 65%);
+  }
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.5rem, 4vw, 4rem);
+
+  @include m.below("sm") {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 1.75rem;
+  }
+}
+
+.columnTitle {
+  @include m.label;
+
+  margin-bottom: 0.85rem;
+  color: var(--d-fg-dim);
+}
+
+.columnLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  a {
+    width: fit-content;
+    font-size: 0.86rem;
+    color: var(--d-muted);
+    transition:
+      color 220ms ease,
+      transform 320ms v.$ease-out-expo;
+
+    &:hover {
+      color: var(--d-fg);
+      transform: translateX(3px);
+    }
+  }
+}
+
+/* ------------------------------------------------------------- wordmark --- */
+
+.content {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.tail {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: clamp(1.25rem, 3vw, 2rem);
+  border-top: 1px solid var(--d-line);
+}
+
+/*
+ * Full-bleed wordmark, cut in half by the bottom edge.
+ *
+ * `--mark-size` is measured against the viewport so the eight letters fill the
+ * whole width. The clip box is 0.52em tall, which is where the middle of the
+ * glyphs sits: with Funnel Display the baseline lands at 0.875em from the top
+ * of a 1em line box and the cap top at 0.169em, so the optical middle of the
+ * word is (0.169 + 0.875) / 2 ≈ 0.52em.
+ */
+.mark {
+  --mark-size: 22.2vw;
+
+  position: relative;
+  width: 100%;
+  height: 0.52em;
+  font-size: var(--mark-size);
+  overflow: hidden;
+  user-select: none;
+  pointer-events: none;
+}
+
+.markText {
+  display: block;
+  font-family: var(--font-funnel), var(--font-display), sans-serif;
+  font-size: 1em;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--d-fg);
+  opacity: 0.1;
+  /* Lift the word inside the clip box so a little more of it shows. */
+  transform: translateY(-0.16em);
+}
+
+.toTop {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex: none;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--d-line-strong);
+  font-family: var(--d-font-mono);
+  font-size: 0.63rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--d-muted);
+  transition:
+    color 240ms ease,
+    border-color 240ms ease;
+
+  &:hover {
+    color: var(--d-fg);
+    border-color: var(--d-fg-dim);
+  }
+
+  @include m.below("sm") {
+    display: none;
+  }
+}

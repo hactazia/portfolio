@@ -1,0 +1,91 @@
+.drawer {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  padding-bottom: 1.5rem;
+  pointer-events: none;
+}
+
+/*
+ * Single drag surface for the whole strip, same footprint as the reference
+ * `h-16` handle. It sits above the pill so the decorative bar can never
+ * intercept the gesture.
+ */
+.grabber {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 2;
+  height: 4rem;
+  cursor: grab;
+  pointer-events: auto;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.pill {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  /* Purely decorative: the grabber above owns all pointer events. */
+  pointer-events: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--d-accent);
+    outline-offset: 4px;
+    border-radius: 0.4rem;
+  }
+}
+
+/* Only revealed when the grab strip is actually reachable (hover / keyboard
+   focus / active drag). It keeps its box so the bar never shifts. */
+.pillLabel {
+  font-family: var(--d-font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--d-muted);
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.drawer:hover .pillLabel,
+.drawer:focus-within .pillLabel,
+.drawer[data-dragging="true"] .pillLabel {
+  opacity: 1;
+}
+
+/* Same geometry and colour ramp as the reference handle; the bar only gains a
+   width transition so it can widen on hover and while dragging. */
+.pillBar {
+  display: block;
+  width: 3.5rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--d-accent) 40%, transparent);
+  transition:
+    background-color 200ms ease,
+    width 380ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.drawer:hover .pillBar {
+  width: 4.25rem;
+  background: color-mix(in oklab, var(--d-accent) 70%, transparent);
+}
+
+.drawer[data-dragging="true"] .pillBar {
+  width: 4.75rem;
+  background: var(--d-accent);
+}

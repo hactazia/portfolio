@@ -1,0 +1,54 @@
+/*
+ * Brand signature — horizontal lockup built on a proportional grid.
+ *
+ * One value drives everything: `--name-size` (F). The ratios below implement
+ * the construction rules; `--cap` and `--mark-shift` are overwritten at runtime
+ * with values measured from the actual font, so the fallbacks here are only a
+ * first-paint approximation.
+ *
+ *   cap height      = measured at runtime (fallback 0.72 F)
+ *   symbol height   = 1.10 × cap      rule: symbol = 100–120 % of cap height
+ *   symbol box      = symbol / 0.898  the artwork only fills 386 of its 430
+ *                                     units, so the box is scaled up until the
+ *                                     *visual* mark matches the target height
+ *   gap             = 0.30 × symbol   rule: 25–40 % of symbol height
+ *   clear space     = 0.25 × symbol   rule: 50 % total, 25 % per side
+ *   mark shift      = distance between the line-box centre and the cap-height
+ *                     centre, so the symbol sits on the optical centre of the
+ *                     word rather than on its geometric box
+ */
+.wordmark {
+  --cap: calc(var(--name-size) * 0.72);
+  --symbol: calc(var(--cap) * 1.6);
+  --symbol-box: calc(var(--symbol) / 0.898);
+  --gap: calc(var(--symbol) * 0.3);
+  --clear: calc(var(--symbol) * 0.25);
+  --mark-shift: calc(var(--name-size) * -0.055);
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap);
+  padding: var(--clear);
+  font-size: var(--name-size);
+  line-height: 1;
+  color: var(--d-fg);
+  white-space: nowrap;
+}
+
+/* Sized from the grid, never from a pixel prop. */
+.mark {
+  --logo-size: var(--symbol-box);
+
+  transform: translateY(var(--mark-shift));
+}
+
+.name {
+  /* `--font-sans` does not exist: Tailwind's `@theme inline` inlines the value
+     into utilities instead of emitting the custom property, and referencing a
+     missing var() invalidates the whole declaration. */
+  font-family: var(--font-funnel), var(--font-display), sans-serif;
+  font-size: var(--name-size);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.025em;
+}

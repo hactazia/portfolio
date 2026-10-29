@@ -1,0 +1,121 @@
+{
+    "projects": [
+        {
+            "slug": "example-project",
+            "title": "Example project",
+            "category": "Sample record",
+            "summary": "Placeholder consumed by the \"01 — Selected work\" list. Copy api/content.example.json to api/content.json and rewrite it, or point CONTENT_FILE at your own file on the host.",
+            "tags": [
+                "TypeScript",
+                "Node.js"
+            ],
+            "year": 2026,
+            "featured": true,
+            "repo": "https://example.com/repository"
+        }
+    ],
+    "showcaseCards": [
+        {
+            "id": "example-card",
+            "title": "Example",
+            "place": "Sample",
+            "date": "01.01.26",
+            "tone": "#5b5bd6",
+            "image": null,
+            "focus": "50% 50%",
+            "href": null,
+            "cta": "In-house build"
+        }
+    ],
+    "contactRows": [
+        {
+            "label": "Email",
+            "kind": "email",
+            "value": "contact@example.com",
+            "href": "mailto:contact@example.com"
+        },
+        {
+            "label": "GitHub",
+            "kind": "profile",
+            "value": "github.com/example",
+            "href": "https://github.com/example"
+        }
+    ],
+    "stackGroups": [
+        {
+            "id": "languages",
+            "label": "Languages",
+            "note": "What I think in",
+            "items": [
+                {
+                    "name": "TypeScript",
+                    "logo": "/logos/typescript.svg",
+                    "href": "https://www.typescriptlang.org",
+                    "color": "#3178c6",
+                    "since": 2018,
+                    "note": "One line saying what the tool actually does here.",
+                    "also": [
+                        "Node.js"
+                    ]
+                }
+            ]
+        }
+    ],
+    "site": {
+        "brand": {
+            "name": "Example",
+            "wordmark": "example"
+        },
+        "logo": {
+            "src": "/logos/hactazia.svg",
+            "alt": "Example"
+        },
+        "tagline": "The one-line identity paragraph the footer repeats.",
+        "location": {
+            "short": "Country — Remote, worldwide",
+            "long": "Country · Working worldwide · CET"
+        },
+        "hero": {
+            "eyebrow": "What you are",
+            "meta": [
+                "Portfolio — Vol. 01",
+                "Country · 0.0°N"
+            ],
+            "lines": [
+                {
+                    "text": "First line,",
+                    "tone": ""
+                },
+                {
+                    "text": "second line,",
+                    "tone": "muted"
+                },
+                {
+                    "text": "third line.",
+                    "tone": "outline"
+                }
+            ],
+            "lead": "The opening paragraph of the page: what you build, and for whom."
+        }
+    },
+    "about": {
+        "paragraphs": [
+            "First paragraph of the About section — how the practice started.",
+            "Second paragraph — what you actually do today.",
+            "Third paragraph — what you do outside client work."
+        ],
+        "stats": [
+            {
+                "value": "0",
+                "label": "Public repos"
+            }
+        ],
+        "timeline": [
+            {
+                "year": "2026",
+                "role": "Role",
+                "company": "Company · what it does"
+            }
+        ]
+    }
+}

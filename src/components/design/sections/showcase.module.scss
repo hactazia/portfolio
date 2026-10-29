@@ -1,0 +1,383 @@
+@use "../../../styles/variables" as v;
+@use "../../../styles/mixins" as m;
+
+.section {
+  position: relative;
+  padding-block: v.$section-gap;
+  border-top: 1px solid var(--d-line);
+}
+
+.head {
+  @include m.shell;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: clamp(1rem, 2vw, 2rem);
+}
+
+.title {
+  @include m.display(clamp(1.9rem, 3.4vw, 3.2rem));
+
+  max-width: 22ch;
+  margin-top: 0.75rem;
+}
+
+/* Placeholders while /api/site is in flight. */
+.labelSkeleton {
+  width: 6rem;
+  height: 0.62rem;
+  border-radius: 0.25rem;
+}
+
+.titleSkeleton {
+  width: min(24rem, 70%);
+  height: clamp(1.9rem, 3.4vw, 3.2rem);
+  margin-top: 0.75rem;
+  border-radius: 0.4rem;
+}
+
+.leadSkeleton {
+  width: 100%;
+  height: 2.6rem;
+  border-radius: 0.3rem;
+}
+
+.linkSkeleton {
+  width: 9rem;
+  height: 0.8rem;
+  border-radius: 0.25rem;
+}
+
+.headAside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  max-width: 22rem;
+}
+
+.lead {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--d-muted);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding-bottom: 0.15rem;
+  border-bottom: 1px solid var(--d-line-strong);
+  font-family: var(--d-font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: border-color 220ms ease, color 220ms ease;
+
+  &:hover {
+    border-color: var(--d-accent);
+    color: var(--d-accent);
+  }
+}
+
+/* ---------------------------------------------------------------- rail --- */
+
+/*
+ * Overlapping fan. The track is exactly one viewport wide: with `n` cards and a
+ * `--visible` share left showing per card, a card has to be
+ *    100% / (1 + (n - 1) * --visible)
+ * of the track for the row to close on itself. The negative `margin-inline`
+ * between siblings (`--step * (--visible - 1)`) does the overlapping, so the
+ * whole scrapbook always fits the screen with no horizontal scroll.
+ */
+.rail {
+  padding-block: clamp(1.5rem, 3vw, 2.5rem);
+
+  /* Phones: go back to a scrolling row, overlapping cards are unreadable there. */
+  @include m.below("md") {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    scrollbar-color: var(--d-line-strong) transparent;
+  }
+}
+
+.track {
+  @include m.shell;
+
+  --visible: 0.62;
+  /* Width that would make `n` cards close on the track exactly. */
+  --step: calc(100% / (1 + (var(--n, 1) - 1) * var(--visible)));
+  /* With only a couple of cards that would be enormous, so it is capped — and
+     the overlap is derived from the *used* width, not from `--step`. */
+  --w: min(var(--step), 24rem);
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  /* Block-axis only: the shell mixin's `margin-inline: auto` centres the track
+     once it hits its max-width, otherwise the fan drifts to the left. */
+  margin-block: 0;
+  padding-block: 1rem 2.5rem;
+  list-style: none;
+
+  @include m.below("md") {
+    width: max-content;
+    max-width: none;
+    margin-inline: 0;
+    padding-inline: v.$gutter;
+    /* No overlap there, so the back face may use the whole card. */
+    --visible: 1;
+  }
+}
+
+.item {
+  position: relative;
+  flex: 0 0 auto;
+  width: var(--w);
+  scroll-snap-align: center;
+
+  & + & {
+    margin-inline-start: calc(var(--w) * (var(--visible) - 1));
+  }
+
+  @include m.below("md") {
+    width: min(72vw, 18rem);
+
+    & + & {
+      margin-inline-start: 1rem;
+    }
+  }
+
+  /* Nothing overlaps the last card, so its back face gets the full width back. */
+  &:last-child .face[data-face="back"] {
+    --hidden: 0%;
+  }
+}
+
+/* ---------------------------------------------------------------- card --- */
+
+.cardLink {
+  display: block;
+  color: inherit;
+  border-radius: 0.9rem;
+
+  &:focus-visible {
+    outline: 2px solid var(--d-accent);
+    outline-offset: 3px;
+  }
+}
+
+/*
+ * Flip card (ReactBits `flip-card` behaviour, CSS only): the wrapper owns the
+ * polaroid tilt and the 3D perspective, the inner element turns on hover or
+ * keyboard focus, and both faces share one grid cell so the back always matches
+ * the front's height.
+ */
+.card {
+  perspective: 1200px;
+  transform: rotate(var(--tilt, 0deg)) translateY(var(--drop, 0px));
+  transition: transform 420ms v.$ease-out-expo;
+}
+
+.item:hover .card,
+.item:focus-within .card {
+  transform: rotate(0deg) translateY(calc(var(--drop, 0px) - 0.6rem)) scale(1.02);
+}
+
+.flip {
+  position: relative;
+  display: grid;
+  transform-style: preserve-3d;
+  transition: transform 780ms cubic-bezier(0.22, 0.75, 0.24, 1);
+}
+
+.item:hover .flip,
+.item:focus-within .flip {
+  transform: rotateY(180deg);
+}
+
+.face {
+  grid-area: 1 / 1;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--d-bg-raise);
+  border: 1px solid var(--d-line);
+  border-radius: 0.9rem;
+  box-shadow: 0 26px 46px -30px rgb(0 0 0 / 95%);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition:
+    border-color 420ms ease,
+    box-shadow 420ms ease;
+}
+
+.item:hover .face {
+  border-color: var(--d-line-strong);
+  box-shadow: 0 34px 60px -30px rgb(0 0 0 / 100%);
+}
+
+/*
+ * Front face: the shot alone, edge to edge. No caption at rest — the text only
+ * exists on the back face, which the flip reveals on hover or focus.
+ */
+.face[data-face="front"] {
+  aspect-ratio: 4 / 5;
+}
+
+/* Placeholder shown while the cards are still being fetched. */
+.skeletonCard {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: 0.9rem;
+  border: 1px solid var(--d-line);
+}
+
+.face[data-face="back"] {
+  /* Share of the card the neighbouring card covers (a % of the flex content
+     box, which is why only the text uses it — lengths are used elsewhere). */
+  --hidden: calc((1 - var(--visible, 0.62)) * 100%);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  padding: 1.1rem 1.1rem 1.2rem;
+  transform: rotateY(180deg);
+  background: linear-gradient(
+    155deg,
+    color-mix(in oklab, var(--tone, #5b5bd6) 34%, #0b0b14),
+    #0b0b14 76%
+  );
+
+  /* Same shot as the front, blurred behind a dark scrim, so the reverse reads
+     as the back of the same polaroid instead of an empty panel. */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -12%;
+    background-image:
+      linear-gradient(
+        to top,
+        rgb(8 8 14 / 94%) 0%,
+        rgb(8 8 14 / 66%) 44%,
+        rgb(8 8 14 / 34%) 100%
+      ),
+      var(--photo, none);
+    background-position:
+      center,
+      var(--focus, center);
+    background-size:
+      cover,
+      cover;
+    filter: blur(14px) saturate(0.95) brightness(0.8);
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+.backTitle {
+  @include m.display(clamp(1.05rem, 1.7vw, 1.4rem));
+
+  color: var(--d-fg);
+}
+
+.backMeta {
+  font-family: var(--d-font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--d-fg-dim);
+}
+
+/* Text stays inside the strip that the next card leaves uncovered. */
+.backTitle,
+.backMeta {
+  padding-right: var(--hidden, 0%);
+}
+
+.backCta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  /* The rule runs edge to edge: the box is pulled out of both paddings and the
+     padding is re-applied inside, so only the label stays inset. */
+  margin: 0.9rem -1.1rem 0;
+  padding: 0.95rem 1.1rem 0;
+  border-top: 1px solid rgb(255 255 255 / 14%);
+  font-family: var(--d-font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--d-accent);
+}
+
+/* Reduced motion: no turn, and the decorative back face stays out of the way. */
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .flip,
+  .face {
+    transition: none;
+  }
+
+  .item:hover .card,
+  .item:focus-within .card {
+    transform: rotate(var(--tilt, 0deg)) translateY(var(--drop, 0px));
+  }
+
+  .item:hover .flip,
+  .item:focus-within .flip {
+    transform: none;
+  }
+
+  .face[data-face="back"] {
+    display: none;
+  }
+}
+
+.photo {
+  position: absolute;
+  inset: 0;
+  /* First layer is the shot; the tone gradient stays visible underneath when a
+     card has no image (mixed down so a pale tone is not a white slab). */
+  background-image:
+    var(--photo, none),
+    linear-gradient(155deg, color-mix(in oklab, var(--tone, #5b5bd6) 62%, #0b0b14), #0b0b14 82%);
+  background-position:
+    var(--focus, center),
+    center;
+  background-size:
+    cover,
+    cover;
+  background-repeat: no-repeat, no-repeat;
+  transition: transform 900ms v.$ease-out-expo;
+
+  .item:hover &,
+  .item:focus-within & {
+    transform: scale(1.03);
+  }
+
+  /* Placeholder texture, invisible under a real photo. */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(135deg, rgb(255 255 255 / 7%) 0 1px, transparent 1px 8px),
+      radial-gradient(120% 90% at 18% 0%, rgb(255 255 255 / 14%), transparent 62%);
+  }
+
+  &[data-has-image]::after {
+    background: radial-gradient(120% 90% at 18% 0%, rgb(255 255 255 / 10%), transparent 62%);
+  }
+}

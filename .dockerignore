@@ -1,0 +1,10 @@
+node_modules
+.pnpm-store
+.next
+out
+.git
+.github
+*.log
+.env
+.env.local
+README.md

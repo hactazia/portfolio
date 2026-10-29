@@ -1,0 +1,39 @@
+name: portfolio
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Empty on purpose: the static bundle calls same-origin `/api/*`
+        # and nginx forwards it to the `api` service below.
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-}
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_started
+    restart: unless-stopped
+
+  # Sample backend. Replace the image/build with your real API, or delete this
+  # service and point `API_UPSTREAM` in `nginx/default.conf` at your own host.
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    environment:
+      PORT: 3000
+      API_ALLOWED_ORIGINS: ${API_ALLOWED_ORIGINS:-*}
+      CONTACT_TO: ${CONTACT_TO:-contact@hactazia.fr}
+      # Content lives on the host, not in git and not in the image. Missing file
+      # -> the API falls back to `content.example.json` shipped in the image.
+      CONTENT_FILE: /app/config/content.json
+      # Same for the images: `/api/assets/*` streams them from this directory.
+      ASSETS_DIR: /app/assets
+    volumes:
+      - ./api:/app/config:ro
+      - ./api/assets:/app/assets:ro
+    expose:
+      - "3000"
+    restart: unless-stopped

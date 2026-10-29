@@ -1,0 +1,60 @@
+@use "../../styles/variables" as v;
+
+.root {
+  position: relative;
+  display: flow-root;
+  min-height: 100dvh;
+  background: var(--d-bg);
+  isolation: isolate;
+}
+
+/*
+ * Opaque page body, drawn as a sheet that lifts off the footer.
+ * It sits above the fixed footer (z-index 0), carries the rounded bottom
+ * corners, and reserves `--footer-h` of transparent margin (measured at
+ * runtime by the footer) so the last stretch of scrolling uncovers it.
+ */
+.content {
+  position: relative;
+  z-index: 1;
+  background: var(--d-bg);
+  margin-bottom: var(--footer-h, 34rem);
+  border-bottom: 1px solid var(--d-line-strong);
+  border-bottom-left-radius: clamp(1.25rem, 2.5vw, 2rem);
+  border-bottom-right-radius: clamp(1.25rem, 2.5vw, 2rem);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 5%),
+    0 34px 80px -18px rgb(0 0 0 / 95%);
+}
+
+/* Page-wide film grain, kept above every layer (footer included). */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.35;
+  animation: grain-in 1.2s v.$ease-out-expo both;
+}
+
+/*
+ * The sticker playground: an empty sheet laid over the whole page body. It
+ * ignores the pointer everywhere so the site stays clickable — only the sticker
+ * hits (`.sticker-peel-hit`) take the events.
+ */
+.stickers {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+@keyframes grain-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 0.35;
+  }
+}
