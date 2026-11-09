@@ -19,6 +19,17 @@ api/content.json
 # API assets (logos, showcase shots): served by the API, never tracked
 api/assets
 
+# Scratch files: screenshots taken while working, editor leftovers, patches
+.shot-*.png
+.tmp-*.png
+*.orig
+*.rej
+*.bak
+
+# Editors
+.vscode
+.idea
+
 # Misc
 .DS_Store
 Thumbs.db

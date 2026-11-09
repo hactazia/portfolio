@@ -8,3 +8,11 @@ out
 .env
 .env.local
 README.md
+# Scratch files and editor folders: never part of a build context.
+.shot-*.png
+.tmp-*.png
+*.orig
+*.rej
+*.bak
+.vscode
+.idea
