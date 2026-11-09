@@ -32,7 +32,7 @@ export function About() {
 
   return (
     <section id="about" className={styles.section}>
-      <div className={styles.layout}>
+      <div className={styles.layout} data-presence-container="">
         <div className={styles.aside}>
           <span className="d-label">03 — About</span>
           <h2 className={styles.statement}>

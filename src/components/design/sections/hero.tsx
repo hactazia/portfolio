@@ -59,7 +59,7 @@ export function Hero({
       </div>
       <div className={styles.veil} aria-hidden />
 
-      <div className={styles.inner}>
+      <div className={styles.inner} data-presence-container="">
         <div className={styles.meta}>
           <div className={styles.metaBlock}>
             {hero ? <span>{hero.eyebrow}</span> : <Skeleton className={styles.metaSkeleton} />}

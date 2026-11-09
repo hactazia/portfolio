@@ -59,110 +59,114 @@ export function Showcase() {
 
   return (
     <section id="showcase" className={styles.section}>
-      <div className={styles.head}>
-        <div>
-          <span className="d-label">02 — Showcase</span>
-          <h2 className={styles.title}>Screens from the workbench.</h2>
+      {/* One block for the whole band, so the gap between the head and the rail
+          belongs to the content column and not to the `<section>`. */}
+      <div className={styles.inner} data-presence-container="">
+        <div className={styles.head}>
+          <div>
+            <span className="d-label">02 — Showcase</span>
+            <h2 className={styles.title}>Screens from the workbench.</h2>
+          </div>
+
+          <div className={styles.headAside}>
+            <p className={styles.lead}>
+              Avatars, shaders and the tooling behind them — captured between builds, half in the
+              editor and half in VRChat.
+            </p>
+            <a className={styles.link} href="#work">
+              Browse the archive
+              <ArrowUpRight size={14} />
+            </a>
+          </div>
         </div>
 
-        <div className={styles.headAside}>
-          <p className={styles.lead}>
-            Avatars, shaders and the tooling behind them — captured between builds, half in the
-            editor and half in VRChat.
-          </p>
-          <a className={styles.link} href="#work">
-            Browse the archive
-            <ArrowUpRight size={14} />
-          </a>
-        </div>
-      </div>
+        <div className={styles.rail}>
+          <ul className={styles.track} style={{ "--n": count } as CSSProperties}>
+            {cards
+              ? cards.map((card, index) => {
+                  const image = resolveCardImage(card.image);
 
-      <div className={styles.rail}>
-        <ul className={styles.track} style={{ "--n": count } as CSSProperties}>
-          {cards
-            ? cards.map((card, index) => {
-                const image = resolveCardImage(card.image);
+                  const body = (
+                    <div className={styles.card}>
+                      <div className={styles.flip}>
+                        <figure className={styles.face} data-face="front">
+                          <span
+                            className={styles.photo}
+                            data-has-image={card.image ? "true" : undefined}
+                            aria-hidden
+                          />
+                        </figure>
 
-                const body = (
-                  <div className={styles.card}>
-                    <div className={styles.flip}>
-                      <figure className={styles.face} data-face="front">
-                        <span
-                          className={styles.photo}
-                          data-has-image={card.image ? "true" : undefined}
-                          aria-hidden
-                        />
-                      </figure>
-
-                      {/* Back face, revealed by the flip on hover / focus. */}
-                      <figure className={styles.face} data-face="back">
-                        <span className={styles.backTitle}>{card.title}</span>
-                        <span className={styles.backMeta}>{card.place}</span>
-                        <span className={styles.backMeta}>{card.date}</span>
-                        <span className={styles.backCta}>
-                          {card.cta}
-                          {card.href ? <ArrowUpRight size={12} aria-hidden /> : null}
-                        </span>
-                      </figure>
+                        {/* Back face, revealed by the flip on hover / focus. */}
+                        <figure className={styles.face} data-face="back">
+                          <span className={styles.backTitle}>{card.title}</span>
+                          <span className={styles.backMeta}>{card.place}</span>
+                          <span className={styles.backMeta}>{card.date}</span>
+                          <span className={styles.backCta}>
+                            {card.cta}
+                            {card.href ? <ArrowUpRight size={12} aria-hidden /> : null}
+                          </span>
+                        </figure>
+                      </div>
                     </div>
-                  </div>
-                );
+                  );
 
-                return (
+                  return (
+                    <li
+                      key={card.id}
+                      onPointerEnter={() => promote(card.id)}
+                      onFocus={() => promote(card.id)}
+                      className={styles.item}
+                      style={
+                        {
+                          "--tilt": `${TILTS[index % TILTS.length]}deg`,
+                          "--drop": `${DROPS[index % DROPS.length]}px`,
+                          "--tone": card.tone,
+                          // Shared by the front photo and the back face's backdrop.
+                          "--photo": image ? `url(${image})` : "none",
+                          "--focus": card.focus ?? "center",
+                          zIndex: layerOf(card.id, index),
+                        } as CSSProperties
+                      }
+                    >
+                      {card.href ? (
+                        <a
+                          className={styles.cardLink}
+                          href={card.href}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          aria-label={`${card.title} — ${card.place} (opens in a new tab)`}
+                        >
+                          {body}
+                        </a>
+                      ) : (
+                        body
+                      )}
+                    </li>
+                  );
+                })
+              : Array.from({ length: SKELETON_SLOTS }, (_, index) => (
                   <li
-                    key={card.id}
-                    onPointerEnter={() => promote(card.id)}
-                    onFocus={() => promote(card.id)}
+                    key={`skeleton-${index}`}
                     className={styles.item}
+                    aria-hidden
                     style={
                       {
                         "--tilt": `${TILTS[index % TILTS.length]}deg`,
                         "--drop": `${DROPS[index % DROPS.length]}px`,
-                        "--tone": card.tone,
-                        // Shared by the front photo and the back face's backdrop.
-                        "--photo": image ? `url(${image})` : "none",
-                        "--focus": card.focus ?? "center",
-                        zIndex: layerOf(card.id, index),
+                        zIndex: index + 1,
                       } as CSSProperties
                     }
                   >
-                    {card.href ? (
-                      <a
-                        className={styles.cardLink}
-                        href={card.href}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        aria-label={`${card.title} — ${card.place} (opens in a new tab)`}
-                      >
-                        {body}
-                      </a>
-                    ) : (
-                      body
-                    )}
+                    {/* Nothing retrieved from the API yet: a skeleton plate, not
+                        invented content. */}
+                    <div className={styles.card}>
+                      <Skeleton className={styles.skeletonCard} />
+                    </div>
                   </li>
-                );
-              })
-            : Array.from({ length: SKELETON_SLOTS }, (_, index) => (
-                <li
-                  key={`skeleton-${index}`}
-                  className={styles.item}
-                  aria-hidden
-                  style={
-                    {
-                      "--tilt": `${TILTS[index % TILTS.length]}deg`,
-                      "--drop": `${DROPS[index % DROPS.length]}px`,
-                      zIndex: index + 1,
-                    } as CSSProperties
-                  }
-                >
-                  {/* Nothing retrieved from the API yet: a skeleton plate, not
-                      invented content. */}
-                  <div className={styles.card}>
-                    <Skeleton className={styles.skeletonCard} />
-                  </div>
-                </li>
-              ))}
-        </ul>
+                ))}
+          </ul>
+        </div>
       </div>
     </section>
   );

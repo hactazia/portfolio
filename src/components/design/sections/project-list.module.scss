@@ -1,14 +1,18 @@
 @use "../../../styles/variables" as v;
 @use "../../../styles/mixins" as m;
 
-/* No top border: the hero box already closes itself with a bottom edge. */
+/*
+ * No top border: the hero box already closes itself with a bottom edge.
+ *
+ * No `padding-block` either: the rhythm moved to `.layout` so that block can
+ * run the full height of the band (see `m.section-box`).
+ */
 .section {
   position: relative;
-  padding-block: v.$section-gap;
 }
 
 .layout {
-  @include m.shell;
+  @include m.section-box;
 
   display: grid;
   grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);

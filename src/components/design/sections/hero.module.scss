@@ -13,7 +13,6 @@
   flex-direction: column;
   overflow: hidden;
   min-height: 96svh;
-  padding-block: 8rem 6rem;
   border-bottom: 1px solid var(--d-line-strong);
   border-radius: 0 0 clamp(1.5rem, 3vw, 2.25rem) clamp(1.5rem, 3vw, 2.25rem);
   background:
@@ -37,11 +36,11 @@
  */
 .small {
   min-height: 0;
-  /* The bottom padding clears the 4rem drag strip at the foot of the hero, so
-     the copy never shares its space with the grab zone. */
-  padding-block: 7.5rem clamp(5.75rem, 9vw, 6.75rem);
 
   .inner {
+    /* The bottom padding clears the 4rem drag strip at the foot of the hero, so
+       the copy never shares its space with the grab zone. */
+    padding-block: 7.5rem clamp(5.75rem, 9vw, 6.75rem);
     flex: none;
     justify-content: flex-start;
     gap: clamp(1.25rem, 2.6vw, 1.9rem);
@@ -88,8 +87,13 @@
     linear-gradient(to bottom, transparent 62%, var(--d-bg-soft) 100%);
 }
 
+/*
+ * The content block of the hero: it is the full height of the band and carries
+ * the hero's own vertical rhythm as padding (see `m.section-box`), so a pointer
+ * in the space above the headline still belongs to the content column.
+ */
 .inner {
-  @include m.shell;
+  @include m.section-box(8rem 6rem, 72rem);
 
   position: relative;
   z-index: 2;

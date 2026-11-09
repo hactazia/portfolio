@@ -1,14 +1,14 @@
 @use "../../../styles/variables" as v;
 @use "../../../styles/mixins" as m;
 
+/* The rhythm lives on `.layout` (`m.section-box`), not here. */
 .section {
   position: relative;
-  padding-block: v.$section-gap;
   border-top: 1px solid var(--d-line);
 }
 
 .layout {
-  @include m.shell;
+  @include m.section-box;
 
   display: grid;
   grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);

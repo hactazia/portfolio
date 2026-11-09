@@ -22,46 +22,50 @@ export function Contacts() {
         <Aurora colors={["#50c878", "#ccccff", "#5b5bd6"]} />
       </div>
 
-      <div className={styles.head}>
-        <div>
-          <span className="d-label">04 — Contact</span>
-          <h2 className={styles.title}>Say hello.</h2>
+      {/* One block for the whole band, so the space between the parts of the
+          section belongs to the content column and not to the `<section>`. */}
+      <div className={styles.inner} data-presence-container="">
+        <div className={styles.head}>
+          <div>
+            <span className="d-label">04 — Contact</span>
+            <h2 className={styles.title}>Say hello.</h2>
+          </div>
+          <p className={styles.note}>
+            The fastest way is email — I answer within two working days.
+          </p>
         </div>
-        <p className={styles.note}>
-          The fastest way is email — I answer within two working days.
-        </p>
-      </div>
 
-      <div className={styles.list}>
-        {rows
-          ? rows.map((contact) => (
-              <a
-                key={contact.label}
-                href={contact.href}
-                className={styles.row}
-                target={contact.href.startsWith("http") ? "_blank" : undefined}
-                rel="noreferrer noopener"
-              >
-                <span className={styles.label}>{contact.label}</span>
-                <span className={styles.value}>{contact.value}</span>
-                <span className={styles.icon} aria-hidden>
-                  <ArrowUpRight size={16} />
-                </span>
-              </a>
-            ))
-          : Array.from({ length: SKELETON_ROWS }, (_, index) => (
-              // Same three columns as a real row, so the list does not reflow
-              // when the API answers.
-              <div key={`skeleton-${index}`} className={styles.row} aria-hidden>
-                <Skeleton className={styles.skeletonLabel} />
-                <Skeleton className={styles.skeletonValue} />
-                <Skeleton className={styles.skeletonIcon} />
-              </div>
-            ))}
-      </div>
+        <div className={styles.list}>
+          {rows
+            ? rows.map((contact) => (
+                <a
+                  key={contact.label}
+                  href={contact.href}
+                  className={styles.row}
+                  target={contact.href.startsWith("http") ? "_blank" : undefined}
+                  rel="noreferrer noopener"
+                >
+                  <span className={styles.label}>{contact.label}</span>
+                  <span className={styles.value}>{contact.value}</span>
+                  <span className={styles.icon} aria-hidden>
+                    <ArrowUpRight size={16} />
+                  </span>
+                </a>
+              ))
+            : Array.from({ length: SKELETON_ROWS }, (_, index) => (
+                // Same three columns as a real row, so the list does not reflow
+                // when the API answers.
+                <div key={`skeleton-${index}`} className={styles.row} aria-hidden>
+                  <Skeleton className={styles.skeletonLabel} />
+                  <Skeleton className={styles.skeletonValue} />
+                  <Skeleton className={styles.skeletonIcon} />
+                </div>
+              ))}
+        </div>
 
-      <div className={styles.footer}>
-        <span>{site?.location?.long}</span>
+        <div className={styles.footer}>
+          <span>{site?.location?.long}</span>
+        </div>
       </div>
     </section>
   );

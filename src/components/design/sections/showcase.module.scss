@@ -1,15 +1,23 @@
 @use "../../../styles/variables" as v;
 @use "../../../styles/mixins" as m;
 
+/* The rhythm lives on `.inner` (`m.section-box`), not here. */
 .section {
   position: relative;
-  padding-block: v.$section-gap;
   border-top: 1px solid var(--d-line);
 }
 
-.head {
-  @include m.shell;
+/*
+ * One block for the whole band: `head` and `rail` used to be two separate
+ * `shell`s, which left the gap between them belonging to the `<section>`
+ * itself — a pointer there anchored to the whole section instead of the
+ * content column.
+ */
+.inner {
+  @include m.section-box;
+}
 
+.head {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
@@ -108,7 +116,9 @@
 }
 
 .track {
-  @include m.shell;
+  /* Inside `.inner`, so no shell of its own: the column is already the content
+     width, and the fan's `--step` percentages measure *this* box. */
+  width: 100%;
 
   --visible: 0.62;
   /* Width that would make `n` cards close on the track exactly. */
@@ -130,7 +140,7 @@
     width: max-content;
     max-width: none;
     margin-inline: 0;
-    padding-inline: v.$gutter;
+    padding-inline: 0;
     /* No overlap there, so the back face may use the whole card. */
     --visible: 1;
   }

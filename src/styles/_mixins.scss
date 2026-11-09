@@ -35,6 +35,28 @@
   padding-inline: $padding;
 }
 
+///
+/// Section container: the block a section's content lives in, sized so its box
+/// *is* the band.
+///
+/// `shell` insets the content with padding, which leaves the block itself
+/// narrower and shorter than the section — a pointer in the section's own
+/// whitespace then belongs to the `<section>`, not to the content column. Here
+/// the gutters become **margins** (so the box edge is the content edge) and the
+/// vertical rhythm comes from `padding-block` **inside** the box (so the block
+/// runs the full height of the band, whitespace included).
+///
+/// Margins are
+///     max(gutter, (100% - max-width) / 2 + gutter)
+/// which is exactly the content box `shell` produces, so the layout does not
+/// move — only what counts as "inside the container" changes.
+@mixin section-box($block: v.$section-gap, $max: v.$max-width) {
+  margin-block: 0;
+  padding-block: $block;
+  padding-inline: 0;
+  margin-inline: max(#{v.$gutter}, calc((100% - #{$max}) / 2 + #{v.$gutter}));
+}
+
 /// Small uppercase mono label used as section eyebrow.
 @mixin label {
   font-family: var(--d-font-mono);

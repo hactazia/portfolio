@@ -31,7 +31,7 @@ export function ProjectList() {
 
   return (
     <section id="work" className={styles.section}>
-      <div className={styles.layout}>
+      <div className={styles.layout} data-presence-container="">
         <aside className={styles.aside}>
           <span className="d-label">01 — Selected work</span>
           <h2 className={styles.asideTitle}>Projects built end to end.</h2>
