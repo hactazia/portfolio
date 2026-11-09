@@ -1,10 +1,10 @@
 "use client";
 
 import { ArrowUpRight } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { useStack } from "@/components/design/site-content";
-import { seatOf, StickerPile } from "@/components/design/sticker-pile";
+import { seatOf, StickerPile, usePhone } from "@/components/design/sticker-pile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { resolveAsset } from "@/lib/site";
 import type { StackGroup, StackItem } from "@/lib/stack";
@@ -25,6 +25,8 @@ const SKELETON_STICKERS = 6;
 export function StackLab() {
   const groups = useStack();
   const [picked, setPicked] = useState<string | null>(null);
+  const phone = usePhone();
+  const panel = useRef<HTMLElement | null>(null);
 
   const total = groups?.reduce((count, group) => count + group.items.length, 0) ?? 0;
 
@@ -35,16 +37,26 @@ export function StackLab() {
   const current = items?.find((item) => item.name === picked) ?? items?.[0] ?? null;
   const group = groups?.find((candidate) => candidate.items.includes(current as StackItem));
 
+  /**
+   * Selects a tool. On a phone the file sits *above* the pile in a single
+   * column, so the panel would change off-screen: bring it back into view.
+   */
+  const pick = (name: string) => {
+    setPicked(name);
+    if (!phone) return;
+    panel.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
   return (
     <section id="stack" className={styles.section}>
-      <div className={styles.split}>
+      <div className={styles.split} data-presence-container="">
         <div className={styles.side}>
           <div className={styles.head}>
             <span className="d-label">05 — Stack</span>
             <h2 className={styles.title}>Tools I build with.</h2>
           </div>
 
-          <aside className={styles.panel} aria-live="polite">
+          <aside className={styles.panel} aria-live="polite" ref={panel}>
             {current && group ? (
               <ToolFile key={current.name} item={current} group={group} />
             ) : (
@@ -62,7 +74,7 @@ export function StackLab() {
 
         <section className={styles.pile} aria-label="Pile of stickers">
           {items ? (
-            <StickerPile items={items} onSelect={(item) => setPicked(item.name)} />
+            <StickerPile items={items} onSelect={(item) => pick(item.name)} />
           ) : (
             <PendingPile />
           )}
@@ -74,7 +86,7 @@ export function StackLab() {
           <ul className={styles.srList}>
             {(items ?? []).map((item) => (
               <li key={item.name}>
-                <button type="button" onClick={() => setPicked(item.name)}>
+                <button type="button" onClick={() => pick(item.name)}>
                   {item.name}
                 </button>
               </li>
