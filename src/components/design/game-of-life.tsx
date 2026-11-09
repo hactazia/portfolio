@@ -132,7 +132,7 @@ export function GameOfLife({
       ref={ref}
       aria-hidden
       onClick={onClick}
-      className={cn("size-full cursor-pointer", className)}
+      className={cn("size-full", className)}
       style={{ opacity, color: "var(--d-fg-dim)" }}
     />
   );
