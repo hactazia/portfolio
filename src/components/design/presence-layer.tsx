@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 
 import { usePresence, documentGeometry, placeCursor } from "@/lib/use-presence";
 
+import { ContainersDebug } from "./containers-debug";
 import styles from "./presence-layer.module.scss";
 
 /** Colours cycled by cursor id, so two visitors never look identical. */
@@ -153,6 +154,9 @@ export function PresenceLayer() {
   return createPortal(
     <div className={styles.layer} aria-hidden>
       <div ref={shift} className={styles.shift}>
+        {/* `?debug`: tints the container of every cursor, see the component. */}
+        <ContainersDebug cursors={cursors} />
+
         {cursors.map((cursor) => {
           // Anchored on purpose: a heading is a heading whatever the window
           // size, while a percentage of the page is not the same sentence once

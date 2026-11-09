@@ -1,0 +1,62 @@
+@use "../../styles/variables" as v;
+
+/*
+ * Presence debug overlay (`?debug`): paints the container each cursor is
+ * anchored to. Purely diagnostic — the component renders nothing unless asked.
+ */
+
+.box {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid rgb(255 60 60 / 90%);
+  /* "background debug": the container itself is tinted, so its extent reads at
+     a glance instead of having to follow a 1 px outline. */
+  background: rgb(255 0 0 / 12%);
+  pointer-events: none;
+  animation: container-in 220ms v.$ease-out-expo both;
+}
+
+/* Anchored by the pointer of *this* client, not by a remote one. */
+.box[data-local="true"] {
+  border-style: dashed;
+  border-color: rgb(255 140 0 / 95%);
+  background: rgb(255 140 0 / 8%);
+}
+
+/* No dot is drawn for this cursor (off this page, or no position sent). */
+.box[data-hidden="true"] {
+  border-color: rgb(255 0 255 / 95%);
+  background: rgb(255 0 255 / 14%);
+}
+
+.label {
+  position: absolute;
+  left: -1px;
+  bottom: 100%;
+  padding: 1px 4px;
+  font: 600 10px/1.5 ui-monospace, "SFMono-Regular", monospace;
+  font-variant-numeric: tabular-nums;
+  color: rgb(255 200 200);
+  background: rgb(10 0 0 / 88%);
+  white-space: nowrap;
+}
+
+.box[data-local="true"] .label {
+  color: rgb(255 214 170);
+}
+
+.box[data-hidden="true"] .label {
+  color: rgb(255 170 255);
+}
+
+@keyframes container-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .box {
+    animation: none;
+  }
+}
