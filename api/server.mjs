@@ -316,10 +316,10 @@ const server = createServer(async (request, response) => {
  * sample API stays dependency-free.
  *
  * Protocol
- *   client -> server  { type: "cursor", path, position: [x, y] | null }
+ *   client -> server  { type: "cursor", path, position: [x, y] | null, anchor: {...} | null }
  *   server -> client  { type: "welcome", id }
- *                     { type: "roster", cursors: [{ id, path, position }] }
- *                     { type: "cursor", id, path, position }
+ *                     { type: "roster", cursors: [{ id, path, position, anchor }] }
+ *                     { type: "cursor", id, path, position, anchor }
  *                     { type: "leave", id }
  *
  * `position` is **normalised against the document** (0 → 1 of the sender's
@@ -327,6 +327,12 @@ const server = createServer(async (request, response) => {
  * same window size nor at the same scroll offset, so it projects the point back
  * into its own viewport. The server only clamps and rounds it; it never
  * interprets it.
+ *
+ * `anchor` is the accurate version of the same idea: `{ sel, fx, fy, ch? }` — the
+ * element the pointer was over, where inside it, and optionally the index of the
+ * character under it. Two visitors on a laptop and on a phone do not share a
+ * layout, so a percentage of the page lands on different content; an element (and
+ * a character) lands on the same one. The server only shape-checks and caps it.
  *
  * The server owns the id: a client never picks one, and every update is
  * rebroadcast with the id the server assigned. `path` scopes the broadcast so
@@ -343,8 +349,35 @@ function normalizePath(value) {
     if (!value || value === "/") return "/";
     return value.replace(/\/+$/, "") || "/";
 }
-/** @type {Map<number, { id: number, socket: import("node:net").Socket, path: string, position: [number, number] | null, alive: boolean, buffer: Buffer }>} */
+/** @type {Map<number, { id: number, socket: import("node:net").Socket, path: string, position: [number, number] | null, anchor: { sel: string, fx: number, fy: number, ch?: number } | null, alive: boolean, buffer: Buffer }>} */
 const sessions = new Map();
+
+/**
+ * Anchors are opaque here: shape-checked, clamped, capped in size — never
+ * interpreted. Anything malformed becomes `null`, and the receivers fall back to
+ * the document percentage.
+ */
+function sanitizeAnchor(value) {
+    if (!isObject(value)) return null;
+    const { sel, fx, fy, ch, hit } = value;
+    if (typeof sel !== "string" || sel.length === 0 || sel.length > 300) return null;
+    if (typeof fx !== "number" || !Number.isFinite(fx)) return null;
+    if (typeof fy !== "number" || !Number.isFinite(fy)) return null;
+
+    // 0 → 1 means "inside the block"; anything outside that range is "out of
+    // container" and the receiver draws it in its own gutter. A wide window can
+    // put the pointer far outside the column (an ultrawide screen leaves ~1000 px
+    // of margin beside a 1296 px block), so the range is generous — but the value
+    // is never folded back onto 0/1.
+    const clamp = (number) => Math.round(Math.min(4, Math.max(-4, number)) * 10_000) / 10_000;
+    const anchor = { sel, fx: clamp(fx), fy: clamp(fy) };
+    if (typeof ch === "number" && Number.isInteger(ch) && ch >= 0 && ch <= 20_000) anchor.ch = ch;
+    if (typeof hit === "string" && hit.length > 0 && hit.length <= 300) anchor.hit = hit;
+    // The anchor was measured in viewport space (a fixed layer): the receivers
+    // project it on the right scroll edge instead of their own offset.
+    if (value.vp === true) anchor.vp = true;
+    return anchor;
+}
 
 function sendFrame(socket, opcode, payload) {
     const data = Buffer.isBuffer(payload) ? payload : Buffer.from(payload, "utf8");
@@ -383,7 +416,12 @@ function rosterFor(path, exceptId) {
     const cursors = [];
     for (const session of sessions.values()) {
         if (session.id === exceptId || session.path !== path) continue;
-        cursors.push({ id: session.id, path: session.path, position: session.position });
+        cursors.push({
+            id: session.id,
+            path: session.path,
+            position: session.position,
+            anchor: session.anchor,
+        });
     }
     return cursors;
 }
@@ -422,12 +460,17 @@ function onClientMessage(session, raw) {
 
     session.path = path;
     session.position = position;
+    session.anchor = sanitizeAnchor(message.anchor);
 
     if (changedPath) {
         sendJson(session, { type: "roster", cursors: rosterFor(path, session.id) });
     }
 
-    broadcast({ type: "cursor", id: session.id, path, position }, path, session.id);
+    broadcast(
+        { type: "cursor", id: session.id, path, position, anchor: session.anchor },
+        path,
+        session.id,
+    );
 }
 
 function readFrames(session, chunk) {
@@ -509,6 +552,7 @@ server.on("upgrade", (request, socket) => {
         socket,
         path: "",
         position: null,
+        anchor: null,
         alive: true,
         buffer: Buffer.alloc(0),
     };

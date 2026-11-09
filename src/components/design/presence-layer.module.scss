@@ -10,6 +10,18 @@
   overflow: hidden;
 }
 
+/*
+ * Scroll compensation: the dots are placed in document coordinates, the layer is
+ * pinned to the viewport, so the offset is a single transform on this wrapper —
+ * written at paint time (see `PresenceLayer`). No transition: it has to land on
+ * the same frame as the scroll, otherwise the dots trail the content.
+ */
+.shift {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
 .cursor {
   position: absolute;
   top: 0;
@@ -27,6 +39,16 @@
 /* No update for a while: the visitor is away, dim the dot. */
 .cursor[data-idle="true"] {
   opacity: 0.2;
+}
+
+/*
+ * Nothing honest to draw at the moment (no position, or the whole dot off the
+ * page). The element stays mounted and keeps its last transform, so the return
+ * is a slide from where it disappeared — the 130 ms transform transition —
+ * instead of a pop at the new place.
+ */
+.cursor[data-off="true"] {
+  opacity: 0;
 }
 
 .dot {
