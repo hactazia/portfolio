@@ -26,8 +26,6 @@ export function GradualBlurNav() {
   const [open, setOpen] = useState(false);
   const site = useSiteContent();
   const sectionHref = useSectionHref();
-  // The CTA is just "say hello": its target is the email row of /api/contacts.
-  const email = useContacts()?.find((row) => row.kind === "email");
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -66,13 +64,6 @@ export function GradualBlurNav() {
             </nav>
 
             <div className={styles.actions}>
-              {email ? (
-                <a href={email.href} className={styles.cta}>
-                  Contact Me
-                </a>
-              ) : (
-                <Skeleton className={styles.ctaSkeleton} />
-              )}
               <button
                 type="button"
                 className={styles.menuButton}

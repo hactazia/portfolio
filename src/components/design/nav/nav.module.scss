@@ -49,12 +49,6 @@
   border-radius: 0.25rem;
 }
 
-.ctaSkeleton {
-  width: 6.5rem;
-  height: 2.2rem;
-  border-radius: 999px;
-}
-
 .links {
   display: flex;
   align-items: center;
@@ -103,34 +97,6 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  height: 2.25rem;
-  padding-inline: 0.95rem;
-  border-radius: 999px;
-  border: 1px solid var(--d-line-strong);
-  background: rgb(242 240 234 / 6%);
-  @include m.display-face;
-  font-size: 0.88rem;
-  @include m.text-blur;
-  transition:
-    background 240ms ease,
-    border-color 240ms ease,
-    color 240ms ease;
-
-  &:hover {
-    background: var(--d-accent);
-    border-color: var(--d-accent);
-    color: #08080f;
-  }
-
-  @include m.below("sm") {
-    display: none;
-  }
 }
 
 .menuButton {
