@@ -10,39 +10,53 @@
 }
 
 /*
- * The one canvas of the pile. It is pinned to the viewport — a document-sized
- * canvas would be tens of megabytes — and the renderer offsets every sticker by
- * the current scroll, so the stickers still belong to the page.
+ * The one canvas of the pile.
+ *
+ * It is a *slice of the document*, not an overlay on the viewport: it is placed in
+ * page coordinates and the browser scrolls it with the content, so the
+ * compositor moves the stickers exactly like the page — no repaint on scroll, and
+ * no way to lag behind it. The field keeps the visible range inside the slice by
+ * moving it before the viewport reaches an edge (see `StickerField.anchor`), and
+ * a page-sized canvas is avoided because a document this tall would be tens of
+ * megabytes of texture.
  *
  * It sits under the die-cut buttons, which stay the only pointer targets.
  */
 .canvas {
-  position: fixed;
-  inset: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
   z-index: 1;
+  /* Width, height and `top` are set by the field: the height is the band. */
   width: 100%;
-  height: 100%;
   pointer-events: none;
 }
 
 /*
- * Die-cut fallback: the logo is a mask over a flat fill, so the silhouette is
- * identical to the canvas version. It is the hit target for the whole life of
- * the sticker — clicks and drags go through it — and stays visible until the
- * canvas has something to show.
+ * One sticker: the button owns the click, the drag and the accessible name, and
+ * the artwork is an `<img>` inside it. It stays visible until the canvas has
+ * something to show — and on a phone, where there is no canvas, it is the
+ * sticker for good.
  */
 .flat {
   position: absolute;
   z-index: 2;
   border: 0;
   padding: 0;
+  background: none;
   pointer-events: auto;
   cursor: grab;
-  mask-repeat: no-repeat;
-  mask-position: center;
-  mask-size: contain;
+  /*
+   * The button sits over the page: no text selection may start on it, and on a
+   * touch screen the drag belongs to the sticker rather than to the scroll.
+   */
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
   filter: drop-shadow(0 7px 12px rgb(0 0 0 / 40%));
-  transform: rotate(var(--rot, 0deg));
+  /* Same transform the field draws with: `--rot` and `--scale` are written on
+     the node every frame while the sticker moves (see `onFrame`). */
+  transform: rotate(var(--rot, 0deg)) scale(var(--scale, 1));
   transition:
     transform 420ms v.$ease-spring,
     filter 420ms ease,
@@ -58,10 +72,24 @@
 }
 
 /*
- * The canvas is painting this one. The button stays in place — it is still the
- * only hit target, and dragging needs it — but it stops being drawn. Keeping it
- * mounted is what makes the hand-over invisible: same box, same rotation, no
- * reflow, no blank frame.
+ * The sticker itself: the logo, already tinted, drawn by the browser. Non-
+ * draggable and click-through, so the button underneath keeps every pointer
+ * event — the native image drag would otherwise steal the press.
+ */
+.art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+/*
+ * The canvas is painting this one. The image has been removed from the DOM for
+ * good; the button stays in place — invisible — because it is still the only hit
+ * target, and dragging needs it.
  */
 .painted {
   opacity: 0;

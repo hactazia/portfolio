@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+} from "react";
 import { createPortal } from "react-dom";
 
 import { preloadStickerAssets, StickerField } from "./sticker-field";
@@ -16,6 +23,34 @@ export type Seat = { u: number; v: number; rotate: number; width: number };
 /** Size range of a sticker, in px. */
 const MIN_WIDTH = 62;
 const MAX_WIDTH = 98;
+
+/**
+ * Below this width a sticker is just an image.
+ *
+ * A phone gets no GL context, no shaders and no physics: the pile still sits in
+ * its zone and every sticker still opens its file, but the artwork is a plain
+ * `<img>` and nothing ever drags. Same seats on both paths, so the layout does
+ * not jump between a phone and a desktop.
+ */
+const PHONE_QUERY = "(max-width: 767.98px)";
+
+const subscribePhone = (onChange: () => void) => {
+  const query = window.matchMedia(PHONE_QUERY);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+};
+
+/** A boolean snapshot, so `useSyncExternalStore` compares it by value. */
+const getPhoneSnapshot = () => window.matchMedia(PHONE_QUERY).matches;
+
+/** Static export: no window, so the page is laid out as a desktop one. */
+const getServerPhoneSnapshot = () => false;
+
+function usePhone() {
+  return useSyncExternalStore(subscribePhone, getPhoneSnapshot, getServerPhoneSnapshot);
+}
+
+export { usePhone };
 
 /** Where a sticker sits now: its seat, or wherever it was dropped. */
 type Placement = { cx: number; cy: number; width: number; rotate: number };
@@ -71,8 +106,10 @@ function toStickerSource(svg: string, color: string): string {
  *
  * `StickerField` owns the canvas, the shaders and the physics for the whole pile.
  * This component only feeds it images, seats and pointer input, and renders the
- * die-cut buttons that act as hit targets — and as the artwork for the first
- * frames, before the canvas has drawn anything.
+ * buttons that act as hit targets — each carrying the sticker's image as its
+ * artwork until the canvas has drawn that sticker, at which point the image is
+ * dropped for good. On a phone the canvas is never created: the images are the
+ * stickers.
  */
 export function StickerPile({
   items,
@@ -82,12 +119,17 @@ export function StickerPile({
   /** Called with the tool whose sticker was clicked (not dragged). */
   onSelect: (item: StackItem) => void;
 }) {
+  const phone = usePhone();
   const zone = useRef<HTMLDivElement | null>(null);
   const field = useRef<StickerField | null>(null);
   const dragged = useRef(false);
   const pressing = useRef<string | null>(null);
   const settleFrame = useRef<number | null>(null);
   const droppedAt = useRef(0);
+  /** The hit target of each sticker, so it can follow the artwork. */
+  const nodes = useRef(new Map<string, HTMLButtonElement>());
+  /** Where the field last drew each sticker (document coordinates). */
+  const published = useRef(new Map<string, { x: number; y: number; width: number; rotate: number; scale: number }>());
 
   const [layer, setLayer] = useState<HTMLElement | null>(null);
   const [sources, setSources] = useState<Record<string, string> | null>(null);
@@ -123,11 +165,12 @@ export function StickerPile({
   }, [key]);
 
   // Decode, mask and hull every logo up front: the canvas then only has to
-  // upload a texture, once per logo, shared by every sticker using it.
+  // upload a texture, once per logo, shared by every sticker using it. A phone
+  // has no texture to warm, so it does not pay for any of it.
   useEffect(() => {
-    if (!sources) return;
+    if (!sources || phone) return;
     preloadStickerAssets(Object.values(sources));
-  }, [sources]);
+  }, [sources, phone]);
 
   const attachZone = (node: HTMLDivElement | null) => {
     zone.current = node;
@@ -166,8 +209,10 @@ export function StickerPile({
 
   // One canvas for the whole pile, pinned to the viewport: stickers live in
   // document coordinates, so the renderer offsets by the scroll every frame.
+  // Phones skip it entirely — a context costs memory and battery there, and the
+  // buttons already show the artwork.
   useEffect(() => {
-    if (!layer) return;
+    if (!layer || phone) return;
 
     const canvas = document.createElement("canvas");
     canvas.className = styles.canvas;
@@ -175,11 +220,27 @@ export function StickerPile({
 
     const instance = new StickerField(canvas, {
       bounds: { width: layer.clientWidth, height: layer.clientHeight },
+      /**
+       * The button is the only pointer target, and the canvas is the only thing
+       * that is animated: left at its seat, the box ends up beside the picture
+       * the moment the sticker springs, wobbles or lifts. Writing the transform
+       * straight onto the node keeps the two together without re-rendering the
+       * pile every frame.
+       */
+      onFrame: (name: string, place: { x: number; y: number; width: number; rotate: number; scale: number }) => {
+        published.current.set(name, place);
+        const node = nodes.current.get(name);
+        if (!node) return;
+        node.style.left = `${place.x - place.width / 2}px`;
+        node.style.top = `${place.y - place.width / 2}px`;
+        node.style.setProperty("--rot", `${place.rotate}deg`);
+        node.style.setProperty("--scale", `${place.scale}`);
+      },
     });
     field.current = instance;
-    instance.setScroll(window.scrollY);
+    instance.setScroll();
 
-    const onScroll = () => instance.setScroll(window.scrollY);
+    const onScroll = () => instance.setScroll();
     const onResize = () => {
       instance.resize();
       instance.setBounds({ width: layer.clientWidth, height: layer.clientHeight });
@@ -196,7 +257,7 @@ export function StickerPile({
       canvas.remove();
       field.current = null;
     };
-  }, [layer]);
+  }, [layer, phone]);
 
   const seats = useMemo(() => {
     if (!area) return null;
@@ -239,27 +300,51 @@ export function StickerPile({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layer, seats, sources, items]);
 
-  // The die-cut buttons step aside once the canvas has actually drawn that
-  // sticker: no blank frame in between, nothing that looks like a load.
+  // Each button's image goes away once the canvas has actually drawn that
+  // sticker: no blank frame in between, nothing that looks like a load. A
+  // sticker is only drawn once it is on screen, so the check keeps running —
+  // slower — until the pile has been scrolled through.
   useEffect(() => {
     const instance = field.current;
-    if (!instance || !seats) return;
+    if (!instance || !seats || phone) return;
 
     let frame = 0;
+    let timer = 0;
     let tries = 0;
+    let ticks = 0;
 
+    /** Reads the field's state back; `true` once every sticker is drawn. */
     const check = () => {
       const ready = instance.paintedIds().sort();
       setPainted((previous) =>
         previous.length === ready.length && previous.every((name, index) => name === ready[index]) ? previous : ready,
       );
-      tries += 1;
-      if (ready.length < items.length && tries < 120) frame = requestAnimationFrame(check);
+      return ready.length >= items.length;
     };
 
-    frame = requestAnimationFrame(check);
-    return () => cancelAnimationFrame(frame);
-  }, [layer, seats, items.length]);
+    // The first frames are a tight loop, so the hand-over is invisible; past
+    // that only a scroll can reveal a new sticker, so 4 checks a second do —
+    // and the timer stops as soon as everything has been drawn.
+    const burst = () => {
+      if (check()) return;
+      tries += 1;
+      if (tries < 120) {
+        frame = requestAnimationFrame(burst);
+        return;
+      }
+      timer = window.setInterval(() => {
+        ticks += 1;
+        // Never leave a timer behind: a broken logo must not poll forever.
+        if (check() || ticks > 1200) window.clearInterval(timer);
+      }, 250);
+    };
+
+    frame = requestAnimationFrame(burst);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearInterval(timer);
+    };
+  }, [layer, seats, items.length, phone]);
 
   /**
    * Stores where a sticker came to rest.
@@ -274,22 +359,34 @@ export function StickerPile({
     if (settleFrame.current) cancelAnimationFrame(settleFrame.current);
     const started = performance.now();
 
+    /** Move the hit target onto where the sticker is right now. */
+    const publish = () => {
+      const place = instance.position(name);
+      if (!place) return;
+      setMoved((previous) => ({ ...previous, [name]: { cx: place.x, cy: place.y, rotate: place.rotate } }));
+    };
+
+    // First, before anything else: the button is the sticker's only pointer
+    // target, and a target left behind where the sticker *used to be* sends the
+    // click to the link or the text underneath. It may still be flying — the
+    // next hops follow it.
+    publish();
+
     const tick = () => {
       if (!instance.settled(name) && performance.now() - started < 2600) {
         settleFrame.current = requestAnimationFrame(tick);
         return;
       }
       settleFrame.current = null;
-      const place = instance.position(name);
-      if (!place) return;
-      setMoved((previous) => ({ ...previous, [name]: { cx: place.x, cy: place.y, rotate: place.rotate } }));
+      publish();
     };
 
     settleFrame.current = requestAnimationFrame(tick);
   };
 
+  // Pointer physics belongs to the canvas; on a phone a sticker is a button.
   useEffect(() => {
-    if (!layer) return;
+    if (!layer || phone) return;
 
     const nameAt = (x: number, y: number) => {
       const host = document.elementFromPoint(x, y)?.closest<HTMLElement>("[data-sticker]");
@@ -302,6 +399,13 @@ export function StickerPile({
       if (!instance) return;
       const name = nameAt(event.clientX, event.clientY);
       if (!name) return;
+      /*
+       * The sticker wins over whatever it covers. Cancelling the press keeps the
+       * browser from starting a text selection under it, dragging the image
+       * natively, or handing the focus to the link underneath — the drag is ours
+       * from here (the `click` still fires, so the sticker's own button works).
+       */
+      event.preventDefault();
       dragged.current = false;
       if (!instance.press(name, event.clientX, event.clientY)) return;
       pressing.current = name;
@@ -343,7 +447,26 @@ export function StickerPile({
       document.documentElement.removeEventListener("pointerleave", onLeave);
       if (settleFrame.current) cancelAnimationFrame(settleFrame.current);
     };
-  }, [layer]);
+  }, [layer, phone]);
+
+  /**
+   * Re-assert the field's transforms after every render.
+   *
+   * React writes `left`/`top` from the seat it knows (a mount, a settle, a new
+   * sticker list), and the canvas is the authority on where the artwork really
+   * is — the two must not disagree, or the click lands beside the picture. A
+   * handful of style writes, only when the pile re-renders at all.
+   */
+  useEffect(() => {
+    for (const [name, place] of published.current) {
+      const node = nodes.current.get(name);
+      if (!node) continue;
+      node.style.left = `${place.x - place.width / 2}px`;
+      node.style.top = `${place.y - place.width / 2}px`;
+      node.style.setProperty("--rot", `${place.rotate}deg`);
+      node.style.setProperty("--scale", `${place.scale}`);
+    }
+  });
 
   const stickers =
     sources && seats
@@ -360,6 +483,10 @@ export function StickerPile({
             <button
               key={item.name}
               type="button"
+              ref={(node) => {
+                if (node) nodes.current.set(item.name, node);
+                else nodes.current.delete(item.name);
+              }}
               title={item.name}
               aria-label={item.name}
               data-sticker={item.name}
@@ -370,8 +497,6 @@ export function StickerPile({
                   top: cy - seat.width / 2,
                   width: seat.width,
                   height: seat.width,
-                  backgroundColor: item.color ?? "var(--d-accent)",
-                  maskImage: `url(${sources[item.logo]})`,
                   "--rot": `${rotate}deg`,
                   "--i": index,
                 } as CSSProperties
@@ -381,7 +506,26 @@ export function StickerPile({
                 if (dragged.current || Date.now() - droppedAt.current < 250) return;
                 onSelect(item);
               }}
-            />
+            >
+              {/*
+                The artwork. The button is only a hit target: the sticker itself
+                is an image, tinted once per logo, and it is removed from the DOM
+                as soon as the canvas draws that sticker — so nothing lingers on
+                top of the pile. On a phone the canvas never runs, and this stays.
+              */}
+              {isPainted ? null : (
+                // A tinted SVG data URI, sized by the seat: nothing for an image
+                // optimiser to do, and the file is already in memory.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  className={styles.art}
+                  src={sources[item.logo]}
+                  alt=""
+                  draggable={false}
+                  decoding="async"
+                />
+              )}
+            </button>
           );
         })
       : null;

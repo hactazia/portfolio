@@ -24,6 +24,26 @@ const FINISHES = { gloss: 0, matte: 1, holo: 2 };
 const SPEED_LIMIT = 2600;
 /** Blur scratch buffers: one square, big enough for the largest sticker. */
 const BLUR_SIZE = 160;
+/** Ceiling for the canvas band, in device pixels: past this, the texture costs more than it buys. */
+const BAND_BUDGET = 12e6;
+
+/**
+ * Height of the canvas band, in CSS px.
+ *
+ * The canvas is a slice of the document rather than a viewport overlay, so the
+ * browser scrolls it with the content — half a viewport of slack above and below
+ * means ordinary scrolling never needs a repaint. The slack gives way to the GPU
+ * budget (and to the page height) on large high-DPI screens: the band is then
+ * shorter, and the loop re-anchors more often.
+ */
+const bandFor = (width, viewportHeight, ratio, docHeight) => {
+  const budget = Math.floor(BAND_BUDGET / (width * ratio * ratio));
+  const slack = Math.round(viewportHeight * 0.5);
+  return Math.max(
+    viewportHeight,
+    Math.min(viewportHeight + slack * 2, budget, Math.max(viewportHeight, docHeight)),
+  );
+};
 
 const VERTEX = `#version 300 es
 in vec2 aGrid;
@@ -436,18 +456,32 @@ export const preloadStickerAssets = (sources = []) => {
 /**
  * Every sticker on the page, drawn by one GL context.
  *
- * Positions are kept in *document* coordinates, so a sticker stays where it was
- * thrown when the page scrolls; the canvas itself is viewport-sized and pinned,
- * and each draw offsets by the current scroll.
+ * Positions are kept in *document* coordinates, and so is the canvas: it is a
+ * slice of the page, wide as the viewport and a couple of viewports tall. The
+ * browser scrolls it with the content, which is what keeps the stickers glued to
+ * the page — repainting a viewport-pinned canvas from the scroll offset can only
+ * ever land a frame late. This class only moves the slice (and redraws it) when
+ * the viewport is about to leave it.
  */
 export class StickerField {
-  constructor(canvas, { bounds }) {
+  constructor(canvas, { bounds, onFrame }) {
     this.canvas = canvas;
+    /**
+     * Called once per frame for every sticker whose transform changed, with the
+     * values the artwork was actually drawn with. The hit target behind the
+     * sticker lives in the DOM, so this is how it stays glued to the picture
+     * while it springs, wobbles or peels.
+     */
+    this.onFrame = onFrame ?? null;
+    // No `desynchronized`: the low-latency swap chain bypasses the compositor,
+    // so the frame that is cleared-but-not-yet-drawn reaches the screen — the
+    // whole pile blinks for a frame, over and over, as soon as the pointer keeps
+    // the render loop running. The loop only costs a frame while something
+    // moves, so the latency it would save is not worth the flicker.
     this.gl = canvas.getContext('webgl2', {
       alpha: true,
       premultipliedAlpha: true,
       antialias: false,
-      desynchronized: true,
       depth: true,
       stencil: false,
     });
@@ -455,7 +489,9 @@ export class StickerField {
     this.textures = new Map();
     this.bounds = bounds ?? { width: 1, height: 1 };
     this.pointer = { x: 0, y: 0, inside: false };
-    this.scrollY = 0;
+    /** Document y of the top edge of the canvas band. */
+    this.bandTop = 0;
+    this.viewportHeight = 1;
     this.dpr = Math.min(window.devicePixelRatio || 1, 2);
     this.raf = 0;
     this.last = 0;
@@ -540,25 +576,81 @@ export class StickerField {
     const width = Math.max(1, window.innerWidth);
     const height = Math.max(1, window.innerHeight);
     const ratio = Math.min(window.devicePixelRatio || 1, 2);
-    if (width === this.cssWidth && height === this.cssHeight && ratio === this.dpr) return;
+    const bandHeight = bandFor(width, height, ratio, this.bounds.height || height);
+    if (
+      width === this.cssWidth &&
+      bandHeight === this.cssHeight &&
+      ratio === this.dpr &&
+      height === this.viewportHeight
+    ) {
+      return;
+    }
+    this.viewportHeight = height;
     this.cssWidth = width;
-    this.cssHeight = height;
+    this.cssHeight = bandHeight;
     this.dpr = ratio;
     this.canvas.width = Math.round(width * ratio);
-    this.canvas.height = Math.round(height * ratio);
+    this.canvas.height = Math.round(bandHeight * ratio);
     this.canvas.style.width = `${width}px`;
-    this.canvas.style.height = `${height}px`;
+    this.canvas.style.height = `${bandHeight}px`;
+    this.anchor(true);
     this.wake();
   }
 
   setBounds(bounds) {
     this.bounds = bounds;
+    // The band is clamped to the page: a shorter document needs less slack, and
+    // a page that grew may now hold a taller one.
+    this.resize();
   }
 
-  setScroll(scrollY) {
-    if (scrollY === this.scrollY) return;
-    this.scrollY = scrollY;
-    this.wake();
+  /**
+   * Keeps the viewport inside the canvas band.
+   *
+   * The canvas is part of the document, not of the viewport, so the browser
+   * scrolls it with the page — the compositor moves canvas and content together
+   * and there is nothing to compensate. All this has to do is move the band
+   * before the viewport walks out of it; that is a document-coordinate change,
+   * so the pixels must be redrawn, which the caller does by waking the loop.
+   *
+   * Returns true when the band moved.
+   */
+  anchor(force = false) {
+    if (!this.gl || !this.cssHeight) return false;
+    const room = this.cssHeight - this.viewportHeight;
+    let next;
+    if (room <= 0) {
+      // No slack to work with (tiny screen or huge DPR): the band follows the
+      // viewport, which costs a redraw per scroll frame — the old behaviour.
+      next = Math.round(window.scrollY);
+    } else {
+      const margin = room * 0.25;
+      const offset = window.scrollY - this.bandTop;
+      if (!force && offset >= margin && offset <= room - margin) return false;
+      const docHeight = Math.max(this.cssHeight, this.bounds.height || this.cssHeight);
+      next = clamp(Math.round(window.scrollY - room / 2), 0, docHeight - this.cssHeight);
+    }
+
+    if (next === this.bandTop && !force) return false;
+    this.bandTop = next;
+    this.canvas.style.top = `${next}px`;
+    return true;
+  }
+
+  /** Document y of the viewport top, read where it is used. */
+  viewportTop() {
+    return window.scrollY;
+  }
+
+  /**
+   * Scroll entry point.
+   *
+   * Scrolling does not move the stickers: the canvas is a slice of the document
+   * and the browser scrolls it with the page. The only work here is moving the
+   * band when the viewport is about to walk out of it, which needs a redraw.
+   */
+  setScroll() {
+    if (this.anchor()) this.wake();
   }
 
   /* -------------------------------------------------------------- stickers */
@@ -631,7 +723,7 @@ export class StickerField {
 
   pointerMove(clientX, clientY, inside = true) {
     this.pointer.x = clientX + window.scrollX;
-    this.pointer.y = clientY + this.scrollY;
+    this.pointer.y = clientY + this.viewportTop();
     this.pointer.inside = inside;
     for (const sticker of this.stickers.values()) {
       if (sticker.press) continue;
@@ -646,7 +738,7 @@ export class StickerField {
     const sticker = this.stickers.get(id);
     if (!sticker) return false;
     const x = clientX + window.scrollX;
-    const y = clientY + this.scrollY;
+    const y = clientY + this.viewportTop();
     const local = this.toLocal(sticker, x, y);
     sticker.local = local;
     sticker.hover = this.solid(sticker, local);
@@ -670,7 +762,7 @@ export class StickerField {
     const sticker = this.stickers.get(id);
     if (!sticker?.press) return;
     const x = clientX + window.scrollX;
-    const y = clientY + this.scrollY;
+    const y = clientY + this.viewportTop();
     const press = sticker.press;
     press.pointer = { x, y };
     if (!press.moving && Math.hypot(x - press.origin.x, y - press.origin.y) > 3) press.moving = true;
@@ -879,29 +971,32 @@ export class StickerField {
     }
   }
 
+  /** Is this sticker doing something? (motion, peel, or the pointer's light) */
+  busy(sticker) {
+    if (sticker.press) return true;
+    if (
+      sticker.vx !== 0 ||
+      sticker.vy !== 0 ||
+      Math.abs(sticker.swing) > 0.0005 ||
+      Math.abs(sticker.swingV) > 0.0005 ||
+      Math.abs(sticker.peel) > 0.0005 ||
+      Math.abs(sticker.peelV) > 0.0005 ||
+      Math.abs(sticker.lift) > 0.0005 ||
+      Math.abs(sticker.liftV) > 0.0005 ||
+      Math.abs(sticker.dir) > 0.002
+    ) {
+      return true;
+    }
+    if (this.pointer.inside) {
+      const target = sticker.light;
+      return Math.hypot(this.pointer.x - target.x, this.pointer.y - target.y) > 0.5;
+    }
+    return false;
+  }
+
   moving() {
-    const pointer = this.pointer;
     for (const sticker of this.stickers.values()) {
-      if (sticker.press) return true;
-      if (
-        sticker.vx !== 0 ||
-        sticker.vy !== 0 ||
-        Math.abs(sticker.swing) > 0.0005 ||
-        Math.abs(sticker.swingV) > 0.0005 ||
-        Math.abs(sticker.peel) > 0.0005 ||
-        Math.abs(sticker.peelV) > 0.0005 ||
-        Math.abs(sticker.lift) > 0.0005 ||
-        Math.abs(sticker.liftV) > 0.0005 ||
-        Math.abs(sticker.dir) > 0.002
-      ) {
-        return true;
-      }
-      if (pointer.inside) {
-        const target = sticker.light;
-        const dx = pointer.x - target.x;
-        const dy = pointer.y - target.y;
-        if (Math.hypot(dx, dy) > 0.5) return true;
-      }
+      if (this.busy(sticker)) return true;
     }
     return false;
   }
@@ -1012,6 +1107,10 @@ export class StickerField {
     const dt = this.last ? clamp((now - this.last) / 1000, 0.001, 1 / 30) : 1 / 60;
     this.last = now;
 
+    // The band may have to move before drawing this frame — same task, so the
+    // moved window and its new pixels land in the same paint.
+    this.anchor();
+
     const gl = this.gl;
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
@@ -1019,9 +1118,31 @@ export class StickerField {
     gl.clearDepth(1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    const originY = this.bandTop;
+    const originX = 0;
+
     this.update(dt);
-    for (const sticker of this.stickers.values()) {
-      if (this.drawSticker(sticker, window.scrollX, this.scrollY)) sticker.painted = true;
+    for (const [id, sticker] of this.stickers) {
+      if (this.drawSticker(sticker, originX, originY)) sticker.painted = true;
+      /*
+       * The artwork and its hit target are two different things, and the field
+       * moves the first without telling anybody: the pile settles, a resize
+       * clamps the stickers back in bounds, a press lifts one. Publish the box
+       * that was actually drawn — on the frame a sticker is first painted, and
+       * every time its transform changes — so the button never drifts from the
+       * picture. Publishing only while a sticker *moves* was the bug: the first
+       * draw of a displaced sticker never fired.
+       */
+      if (!this.onFrame || !sticker.painted) continue;
+      const rotate = sticker.rotate + sticker.swing;
+      const scale = 1 + 0.07 * Math.max(0, sticker.lift);
+      const seen = sticker.published;
+      if (seen && seen.x === sticker.x && seen.y === sticker.y && seen.rotate === rotate && seen.scale === scale) {
+        continue;
+      }
+      const place = { x: sticker.x, y: sticker.y, width: sticker.width, rotate, scale };
+      sticker.published = place;
+      this.onFrame(id, place);
     }
 
     if (this.moving()) this.raf = requestAnimationFrame(this.frame);
